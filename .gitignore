@@ -3,4 +3,6 @@ images/
 
 # Monografia
 monografia/build/
-monografia/monografia.pdf
+
+# Others
+*.bkp
