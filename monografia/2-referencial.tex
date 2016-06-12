@@ -2,6 +2,30 @@
 
 \section{Esteganografia}
 
+Esteganografia, em um contexto atual, é a prática de esconder um aquivo digital dentro de outro. Estes arquivos podem ser imagens, vídeos, aúdio, ou simplesmente texto. A palavra estaganografia combina as palavras gregas \emph{steganos}, que significa ``coberto'', ou ``protegido'', e \emph{graphein}, que significa ``escrita''.
+
+.\citeonline{boehm_stegexpose-tool_2014}
+
+
+\subsection{História da Esteganografia}
+Apesar do uso moderno comumente envolver arquivos de computador, a esteganografia é uma prática antiga que tem muitos anos de história.
+
+\subsection{Métodos de Esteganografia}
+\subsubsection{Least Significant Bit (LSB)}
+
+\emph{Least Significant Bit} (LSB) (literalmente, bit menos significante) é o método mais básico de estaganografia moderna. O bit menos significativo é o que torna uma sequência de bits par ou impar. No byte \texttt{0110110\textcolor{red}{1}}, o bit menos significativo é o bit \texttt{\textcolor{red}{1}} que está na extrema esquerda.
+
+Ao alterar o LSB o valor do byte não altera muito, se comprado a mudança a qualquer um dos outros bits. E é por isso que muitos métodos de esteganografia alteram apenas os LSBs, assim o valor de cada byte não terá uma alteração significativa. Em uma imagem, por exemplo, após aplicar o método LSB para esconder uma mensagem, os bits mais a direita terão sido alterados, mas a imagem, para o olho humano, continua a mesma. Não há mudanças perceptíveis para o olho humano.
+
+Alterando os LSBs, a capacidade máxima que temos para esconder uma informação é de $1/8$ do tamanho do arquivo. Se uma imagem tem 152 Kilobytes, podemos esconder 19 Kilobytes (152 Kilobits) de informação.
+
+\subsubsection{Discrete Cosine Transform (DCT)}
+
+No formato de imagem JPEG, para cada componente de cor o formato usa \emph{Discrete Cosine Transform} (DCT) para transformar blocos de 8x8 pixels em coeficentes 64 DCTs cada. \cite{provos_hide_2003}
+
+
 \section{Esteganálise}
+
+\subsection{Métodos de Esteganálise}
 
 \section{Curva ROC}
