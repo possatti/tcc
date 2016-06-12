@@ -3,12 +3,6 @@ SHELL=/bin/bash
 .ONESHELL:
 .PHONY: clean outguess f5 steghide
 
-# Monograph variables
-MONOGRAPH_DIR=monografia
-MONOGRAPH_BUILD_DIR=$(MONOGRAPH_DIR)/build
-MONOGRAPH_TEX_PATH=$(MONOGRAPH_DIR)/monografia.tex
-MONOGRAPH_PDF_PATH=$(MONOGRAPH_DIR)/monografia.pdf
-
 # F5 steganography tool
 F5=java -jar tools/f5.jar
 
@@ -94,14 +88,7 @@ outguess_check:
 	done
 	echo "All files contain hidden messages."
 
-
-$(MONOGRAPH_PDF_PATH): $(MONOGRAPH_TEX_PATH)
-	mkdir $(MONOGRAPH_BUILD_DIR) -p
-	pdflatex -interaction=nonstopmode -halt-on-error -output-directory=$(MONOGRAPH_BUILD_DIR) $(MONOGRAPH_TEX_PATH)
-	pdflatex -interaction=nonstopmode -halt-on-error -output-directory=$(MONOGRAPH_BUILD_DIR) $(MONOGRAPH_TEX_PATH)
-
 clean:
 	if [ -d "$(OUTGUESS_DIR)" ]; then rm -r $(OUTGUESS_DIR); fi
 	if [ -d "$(STEGHIDE_DIR)" ]; then rm -r $(STEGHIDE_DIR); fi
 	if [ -d "$(F5_DIR)" ]; then rm -r $(F5_DIR); fi
-	if [ -d "$(MONOGRAPH_BUILD_DIR)" ]; then rm -r $(MONOGRAPH_BUILD_DIR); fi
