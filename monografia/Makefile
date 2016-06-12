@@ -5,12 +5,12 @@ SHELL=/bin/bash
 
 # Other variables
 GOOGLE_DRIVE_DIR = /home/possatti/gdrive/tcc
-TEX_FILES = monografia.tex 1-introducao.tex 2-referencial.tex 3-desenvolvimento.tex
+TEX_FILES = monografia.tex 0-abstract.tex 0-resumo.tex 1-introducao.tex 2-referencial.tex
 
 
 all: monografia.pdf
 
-monografia.pdf: monografia.tex
+monografia.pdf: $(TEX_FILES)
 	pdflatex -interaction=nonstopmode -halt-on-error monografia
 	bibtex monografia
 	pdflatex -interaction=nonstopmode -halt-on-error monografia
@@ -25,16 +25,15 @@ upload: monografia.pdf
 	#drive push "$(GOOGLE_DRIVE_DIR)" -no-prompt
 
 deletar_lixo:
-	-rm monografia.bbl
-	-rm monografia.idx
-	-rm monografia.lot
-	-rm monografia.toc
-	-rm abntex2-modelo-include-comandos.aux
-	-rm monografia.blg
-	-rm monografia.lof
-	-rm monografia.aux
-	-rm monografia.brf
-	-rm monografia.log
+	-rm *.bbl
+	-rm *.idx
+	-rm *.lot
+	-rm *.toc
+	-rm *.blg
+	-rm *.lof
+	-rm *.aux
+	-rm *.brf
+	-rm *.log
 
 clean:
 	$(MAKE) deletar_lixo

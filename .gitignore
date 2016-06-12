@@ -2,4 +2,5 @@
 images/
 
 # Others
+nohup.out
 *.bkp
