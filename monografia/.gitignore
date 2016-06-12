@@ -1,0 +1,11 @@
+# Build Latex
+*.aux
+*.blg
+*.idx
+*.log
+*.pdf
+*.toc
+*.bbl
+*.brf
+*.lof
+*.lot
