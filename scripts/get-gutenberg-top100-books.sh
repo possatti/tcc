@@ -109,6 +109,6 @@ for book in $top100_books; do
 		echo "pg$book.txt exists. Skipping."
 	else
 		echo "Trying $book."
-		#curl "http://www.gutenberg.org/cache/epub/$book/pg$book.txt" > "pg$book.txt"
+		curl "http://www.gutenberg.org/cache/epub/$book/pg$book.txt" > "pg$book.txt"
 	fi
 done
