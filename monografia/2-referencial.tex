@@ -1,16 +1,18 @@
 \chapter{Referêncial Teórico}
 
 \section{Esteganografia}
+%-----------------------
 
 Esteganografia, em um contexto atual, é a prática de esconder um aquivo digital dentro de outro. Estes arquivos podem ser imagens, vídeos, aúdio, ou simplesmente texto. A palavra estaganografia combina as palavras gregas \emph{steganos}, que significa ``coberto'', ou ``protegido'', e \emph{graphein}, que significa ``escrita''.
 
-.\citeonline{boehm_stegexpose-tool_2014}
-
 
 \subsection{História da Esteganografia}
+
 Apesar do uso moderno comumente envolver arquivos de computador, a esteganografia é uma prática antiga que tem muitos anos de história.
 
+
 \subsection{Métodos de Esteganografia}
+
 \subsubsection{Least Significant Bit (LSB)}
 
 \emph{Least Significant Bit} (LSB) (literalmente, bit menos significante) é o método mais básico de estaganografia moderna. O bit menos significativo é o que torna uma sequência de bits par ou impar. No byte \texttt{0110110\textcolor{red}{1}}, o bit menos significativo é o bit \texttt{\textcolor{red}{1}} que está na extrema esquerda.
@@ -25,7 +27,19 @@ No formato de imagem JPEG, para cada componente de cor o formato usa \emph{Discr
 
 
 \section{Esteganálise}
+%-----------------------
 
-\subsection{Métodos de Esteganálise}
+A esteganálise é uma área de pesquisa que busca criar métodos para detectar quando a esteganografia foi aplicada em um item ou não. Alguns dos principais métodos de esteganálise são:
+
+\begin{itemize}
+\item Chi Square \cite{westfeld1999attacks}: é uma análise estatística dos pares de valores (PoV's) trocados durante a esteganografia LSB. PoV's são grupos de valores binários contidos nos LSBs de um objeto.
+\item RS Analysis \cite{fridrich2001reliable}: detecta LSBs espalhados em imagens em tons de cinza ou coloridas ao inspecionar as diferenças no número de grupos regulares e singulares para os LSB e o plano LSB deslocado.
+\item Primary Sets \cite{dumitrescu2002steganalysis}: baseado em um identidade estatística relacionada a alguns conjuntos de pixels em uma imagem.
+\item Sample Pair \cite{dumitrescu2003detection}: baseado em uma máquina de estados finitos cujos estados são múltiplos conjuntos selecionados de pares de amostras chamados ``trace multisets''.
+\end{itemize}
+
 
 \section{Curva ROC}
+%-----------------------
+
+

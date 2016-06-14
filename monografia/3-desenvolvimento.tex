@@ -1,0 +1,63 @@
+\chapter{Desenvolvimento}
+
+Para testar os métodos de estanálise propostos, nós selecionamos três ferramentas de esteganografia. Decidimos usar texto puro como mensagem secreta e imagens JPEG como meio esteganográfico. Escolhemos imagens JPEG pois o único formato em comum entre as ferramentas de esteganografia que utilizamos é este formato. E também porque a esteganografia em imagens, em especial JPEG, é muito comum \cite{?}. Todas as ferramentas de esteganografia que selecionamos permitem o uso de qualquer tipo de arquivo como mensagem secreta. Mas escolhemos utilizar texto puro, por acreditamos que este é o uso mais comum.
+
+
+\section{Métodos de Esteganografia}
+
+Para aplicar os métodos de esteganografia, nós selecionamos três das ferramentas mais populares para esse fim.
+
+\subsection{Outguess}
+
+O algoritmo do Outguess usa números pseudo-aleatórios para distribuir os bits da mensagem secreta entre LSBs das DCTs de uma imagem JPEG. \cite{provos_hide_2003}
+
+[pseudo-código do outguess]
+
+\subsection{Steghide}
+
+\begin{citacao}[english]
+The color-respectivly sample-frequencies are not changed thus making the embedding resistant against first-order statistical tests.\footnote{Texto estraído da página de manual do Steghide}
+\end{citacao}
+
+\subsection{F5}
+
+Usa uma técnica chamada de ``permutative straddling'' para distribuir as alterações uniformemente pelo esteganograma.
+
+\begin{citacao}[english]
+Instead of replacing the least-significant bit of a DCT coefficient with message data, F5 decrements its absolute value in a process called matrix encoding. As a result, there is no coupling of any fixed pair of DCT coefficients, meaning the $X^{2}$-test cannot detect F5. \cite{provos_hide_2003}.
+\end{citacao}
+
+
+\section{Método de esteganálise}
+%-------------------------------
+
+Para praticarmos a esteganálise nós utilizamos o StegExpose \cite{boehm_stegexpose-tool_2014}, que é uma ferramenta que reúne a implementação de quatro diferentes técnicas de esteganálise: Primary Sets \cite{dumitrescu2002steganalysis}, Chi Square \cite{westfeld1999attacks}, Sample Pair \cite{dumitrescu2003detection}, e RS Analysis \cite{fridrich2001reliable}.
+
+As implementações destas técnicas não foram desenvolvidas pelos criadores do StegExpose. Mas eles usaram as implementações dos seguintes autores:
+
+
+\section{Banco de Imagens}
+%-------------------------
+
+Para executar o trabalho, precisávamos de um banco de imagens no formato JPEG. Construímos um web scrapper para extrair imagens de um fonte na internet. Todas as imagens são de domínio público (?), e em grande maioria são fotografias. Como fonte de imagens, consideramos usar um dos seguintes sites: Flickr, Pinterest, Google Imagens, Pixabay. Mas decidimos usar o Pixabay [???] como fonte exclusiva para as imagens. Pois todas as suas imagens são de domínio público, licensiadas sob a \emph{Creative Commons CC0}\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/deed.en}}.
+
+Os termos de pesquisa usados para o Web Scrapper foram nomes de países, assim como foi feito também em \cite{boehm_stegexpose-tool_2014}. Consideramos que esse método nos traria imagens dos tipos mais variados possíveis.
+
+Ao todo, foram coletadas X imagens para compor o nosso banco de imagens.
+
+\section{Banco de Texto?}
+
+O texto usado para este trabalho foi composto por vários livros do Project Gutenberg \footnote{\url{http://www.gutenberg.org/}}. Da coleção de livros mais baixados do site \footnote{\url{http://www.gutenberg.org/browse/scores/top}}, baixamos X livros. Na tabela abaixo está o nome do livro, autor, e tamanho do arquivo. Todos os arquivos são em formato de texto puro (".txt"), codificados em UTF-8.
+
+\begin{table}
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Nome} & \textbf{Autor} & \textbf{Tamanho} \\ \hline
+		Pride and Prejudice & Jane Austen & ?? Kb \\ \hline
+		The Adventures of Sherlock Holmes & Arthur Conan Doyle & ?? Kb \\ \hline
+		... & ... & ... \\ \hline
+	\end{tabular}
+ 	\caption{Livros usados como mensagem secreta.}
+\end{table}
+
+Todos os livros foram compilados para um único arquivo. Quando alguma quantidade de texto era necessária, um script extraía a quantidade exata de bytes deste arquivo para ser usado para a esteganografia.

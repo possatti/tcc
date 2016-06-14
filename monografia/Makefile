@@ -4,8 +4,8 @@ SHELL=/bin/bash
 .PHONY: all clean upload
 
 # Other variables
-GOOGLE_DRIVE_DIR = /home/possatti/gdrive/tcc
-TEX_FILES = monografia.tex 0-abstract.tex 0-resumo.tex 1-introducao.tex 2-referencial.tex
+GOOGLE_DRIVE_DIR = /home/possatti/gdrive/TCC
+TEX_FILES = monografia.tex 0-abstract.tex 0-resumo.tex 1-introducao.tex 2-referencial.tex 3-desenvolvimento.tex
 
 
 all: monografia.pdf
@@ -20,9 +20,8 @@ monografia.pdf: $(TEX_FILES)
 upload: monografia.pdf
 	mkdir $(GOOGLE_DRIVE_DIR) -p
 	now=`date +"%F %T"`
-	echo $$now
-	cp monografia.pdf "$(GOOGLE_DRIVE_DIR)/monografia $$now.pdf"
-	#drive push "$(GOOGLE_DRIVE_DIR)" -no-prompt
+	cp monografia.pdf "$(GOOGLE_DRIVE_DIR)/Monografia $$now.pdf"
+	drive push -no-prompt "$(GOOGLE_DRIVE_DIR)"
 
 deletar_lixo:
 	-rm *.bbl
