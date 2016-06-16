@@ -20,13 +20,6 @@ images_per_coutry = int(sys.argv[4])
 
 search_terms = ['Russia', 'Canada', 'China', 'United', 'Brazil', 'Australia', 'India', 'Argentina', 'Kazakhstan', 'Algeria', 'Democratic', 'Saudi', 'Mexico', 'Indonesia', 'Sudan', 'Libya', 'Iran', 'Mongolia', 'Peru', 'Chad', 'Niger', 'Angola', 'Mali', 'South', 'Colombia', 'Ethiopia', 'Bolivia', 'Mauritania', 'Egypt', 'Tanzania', 'Nigeria', 'Venezuela', 'Pakistan', 'Namibia', 'Mozambique', 'Turkey', 'Chile', 'Zambia', 'Myanmar', 'Afghanistan', 'France', 'Somalia', 'Central', 'South', 'Ukraine', 'Madagascar', 'Botswana', 'Kenya', 'Yemen', 'Thailand', ]
 
-
-#term = 'Russia'
-#r = requests.get('https://pixabay.com/api/?key='+pb_token+'&q='+term+'&image_type=photo&safesearch=true&per_page='+images_per_coutry)
-#rjson = json.load(r.text)
-#print
-#print(r.text)
-
 for i, term in enumerate(search_terms):
     if i > number_of_coutries:
         break
@@ -37,7 +30,6 @@ for i, term in enumerate(search_terms):
     payload = {'key': pb_token, 'q': term, 'image_type': 'photo', 'safesearch': 'true', 'per_page': images_per_coutry}
     r = requests.get('https://pixabay.com/api/', params=payload)
     print('Requesting:', r.url)
-    # j = json.load(r.text)
     j = r.json()
 
     # Download each image
