@@ -1,4 +1,4 @@
 #!/bin/sh
 
-sudo apt-get install steghide
-sudo apt-get install outguess
+sudo apt-get -y install steghide
+sudo apt-get -y install outguess
