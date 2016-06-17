@@ -20,6 +20,8 @@ images_per_coutry = int(sys.argv[4])
 
 search_terms = ['Russia', 'Canada', 'China', 'United', 'Brazil', 'Australia', 'India', 'Argentina', 'Kazakhstan', 'Algeria', 'Democratic', 'Saudi', 'Mexico', 'Indonesia', 'Sudan', 'Libya', 'Iran', 'Mongolia', 'Peru', 'Chad', 'Niger', 'Angola', 'Mali', 'South', 'Colombia', 'Ethiopia', 'Bolivia', 'Mauritania', 'Egypt', 'Tanzania', 'Nigeria', 'Venezuela', 'Pakistan', 'Namibia', 'Mozambique', 'Turkey', 'Chile', 'Zambia', 'Myanmar', 'Afghanistan', 'France', 'Somalia', 'Central', 'South', 'Ukraine', 'Madagascar', 'Botswana', 'Kenya', 'Yemen', 'Thailand', ]
 
+os.mkdir(images_dir)
+
 for i, term in enumerate(search_terms):
     if i > number_of_coutries:
         break
