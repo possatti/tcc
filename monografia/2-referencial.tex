@@ -5,10 +5,19 @@
 
 Esteganografia, em um contexto atual, é a prática de esconder um aquivo digital dentro de outro. Estes arquivos podem ser imagens, vídeos, aúdio, ou simplesmente texto. A palavra estaganografia combina as palavras gregas \emph{steganos}, que significa ``coberto'', ou ``protegido'', e \emph{graphein}, que significa ``escrita''.
 
-
-\subsection{História da Esteganografia}
-
 Apesar do uso moderno comumente envolver arquivos de computador, a esteganografia é uma prática antiga que tem muitos anos de história.
+
+A esteganografia contrasta com a criptografia quanto ao aspecto da confidencialidade. A criptografia oferece um meio de comunicação seguro, onde terceiros não podem enteneer o que está sendo conversado, porém sabe que informação confidencial está sendo trocada.
+
+O objetivo da esteganografia é modificar o arquivo portador de forma imperceptível, de maneira que nada seja revelado. Nem a presença de uma mensagem secreta e, muito menos, a mensagem secreta em si. \cite{westfeld1999attacks}
+
+Sistemas esteganográficos geralmente funcionam processando dois parâmetros: uma mensagem secreta, e uma mensagem de cobertura. \cite{westfeld1999attacks}  % Tem uma imagem bonitinha no artigo que pode ser útil.
+Alguns também precisam de uma senha para criptografar a mensagem. \cite{??}
+
+Arquivos de múltimídia, como aúdio e vídeo, servem como exceletentes portadores. Pois contém rúido que serve de espaço para inserir uma mensagem secreta. \cite{westfeld1999attacks}
+
+Um esteganograma deve ter as mesmas características estatísticas do aquivo original. De forma contrária, o sistema esteganográfico seria inseguro. \cite{westfeld1999attacks} Pois a presença de uma mensagem secreta seria mais facilmente detectada.
+
 
 
 \subsection{Métodos de Esteganografia}
@@ -29,14 +38,23 @@ No formato de imagem JPEG, para cada componente de cor o formato usa \emph{Discr
 \section{Esteganálise}
 %-----------------------
 
-A esteganálise é uma área de pesquisa que busca criar métodos para detectar quando a esteganografia foi aplicada em um item ou não. Alguns dos principais métodos de esteganálise são:
+A esteganálise é uma área de pesquisa que busca criar métodos para detectar quando a esteganografia foi aplicada em um item ou não.
 
-\begin{itemize}
-\item Chi Square \cite{westfeld1999attacks}: é uma análise estatística dos pares de valores (PoV's) trocados durante a esteganografia LSB. PoV's são grupos de valores binários contidos nos LSBs de um objeto.
-\item RS Analysis \cite{fridrich2001reliable}: detecta LSBs espalhados em imagens em tons de cinza ou coloridas ao inspecionar as diferenças no número de grupos regulares e singulares para os LSB e o plano LSB deslocado.
-\item Primary Sets \cite{dumitrescu2002steganalysis}: baseado em um identidade estatística relacionada a alguns conjuntos de pixels em uma imagem.
-\item Sample Pair \cite{dumitrescu2003detection}: baseado em uma máquina de estados finitos cujos estados são múltiplos conjuntos selecionados de pares de amostras chamados ``trace multisets''.
-\end{itemize}
+Existem dois tipos principais de esteganálise: visuais e estatísticos. Quandos disponíveis, ataques estatísticos são superiores aos visuais, pois são menos dependentes do arquivo original e podem ser completamente automatizados, o quê permite processar vários itens em larga escala. \cite{westfeld1999attacks}
+
+Alguns dos principais métodos de esteganálise são: Chi Square, RS Analysis, Primary Sets, Sample Pair.
+
+\subsection{Chi Square}
+\cite{westfeld1999attacks}: é uma análise estatística dos pares de valores (PoV's) trocados durante a esteganografia LSB. PoV's são grupos de valores binários contidos nos LSBs de um objeto.
+
+\subsection{RS Analysis}
+\cite{fridrich2001reliable}: detecta LSBs espalhados em imagens em tons de cinza ou coloridas ao inspecionar as diferenças no número de grupos regulares e singulares para os LSB e o plano LSB deslocado.
+
+\subsection{Primary Sets}
+\cite{dumitrescu2002steganalysis}: baseado em um identidade estatística relacionada a alguns conjuntos de pixels em uma imagem.
+
+\subsection{Sample Pair}
+\cite{dumitrescu2003detection}: baseado em uma máquina de estados finitos cujos estados são múltiplos conjuntos selecionados de pares de amostras chamados ``trace multisets''.
 
 
 \section{Curva ROC}
