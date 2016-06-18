@@ -47,11 +47,40 @@ Existem dois tipos principais de esteganálise: visuais e estatísticos. Quandos
 Alguns dos principais métodos de esteganálise são: Chi Square, RS Analysis, Primary Sets, Sample Pair.
 
 \subsection{Chi Square}
+
 O \emph{\chisquare} (Chi Square) \cite{westfeld1999attacks} é uma análise estatística dos pares de valores (PoVs) trocados durante a esteganografia LSB.
-
-Sobrescrever os LSBs de uma imagem transforma alguns valores em outros valores que apenas diferem pelo LSB. Esses pares de valores são chamados de PoV. \texttt{0110110\textcolor{red}{1}} forma um PoV com \texttt{0110110\textcolor{red}{0}}. Se os LSBs sobrescrescritos forem uniformemente distribuídos, as frequências dos valores de cada PoV irá se igualar. Veja a figura fig . % Fig. 14
-
 A ideia do Chi Square é comparar as distribuição de frequências téorica esperada de esteganogramas com algumas amostras da distribuição observada no item que está sendo análisado.
+
+Sobrescrever os LSBs de uma imagem transforma alguns valores em outros valores que apenas diferem pelo LSB. Esses pares de valores são chamados de PoV. Por exemplo, \texttt{0110110\textcolor{red}{1}} forma um PoV com \texttt{0110110\textcolor{red}{0}}. Se os LSBs sobrescrescritos forem uniformemente distribuídos, as frequências dos valores de cada PoV irá se igualar. Ou seja, \texttt{0110110\textcolor{red}{1}} apareceria tantas vezes quanto \texttt{0110110\textcolor{red}{0}}. Meio-a-meio. Veja a figura \ref{fig:chi-histogram}.
+
+\begin{figure}[ht!] % Fig. 14
+\centering
+\includegraphics[width=90mm]{img/westfeld-histogram.png}
+\caption{\label{fig:chi-histogram}Histograma das cores de uma imagem antes e depois de esteganografia com EzStego}
+\legend{Fonte: \citeonline{westfeld1999attacks}}
+\end{figure}
+
+Um ponto crítico é como podemos obter a distribuição de frequências teoricamente esperada (i. e., a frequência de ocorrências que nós esperaríamos, após aplicarmos esteganografia)
+ % A critical point is how to obtain the theoretically expected frequency distribution (i. e., the frequency of occurrence we would expect after applying stegano- graphic changes).
+Essa frequência não pode ser derivada do item que está sendo análisado, porque ele pode ter sido alterado por operações esteganográficas.
+ % This frequency must not be derived from our random sample, because this random sample could have been changed by steganographic op- erations.
+Mas na maioria dos casos, nós não temos o arquivo original disponível para compararmos, ou para derivar a frequência esperada. No original, a frequência teoretica esperada é a média aritmética das duas frequências de um PoV.
+ % But in most cases we don’t have the original to compare with or to derive the expected frequency from. In the original, the theoretically expected frequency is the arithmetic mean of the two frequencies in a PoV.
+A linha tracejada na figura 14 conecta a média aritimética desses valores. Porque a esteganografia sobrescreve os LSBs, ela não muda a soma dessas duas frequências.
+ % The dashed line in Fig. 14 connects these arithmetic mean values. Because the embedding function overwrites the least significant bits, it does not change the sum of these two frequencies.
+O quantidade tirada dos valores ímpares é transferida para os valores pares correspondentes de cada PoV, e vice versa.
+ % The count taken from the odd value frequency is transferred to the corresponding even value frequency in each PoV, and vice versa.
+Como a soma é constante, a média aritmética também é a mesma para cada PoV. Tanto no arquivo original, quanto no arquivo alterado, o estanograma.
+ % As the sum stays constant, the arithmetic mean is the same for a PoV in both, the original carrier medium and each corresponding steganogram.
+Isso nos permite obter a distribuição de frequências teoricamente esperada através do item que está sendo analisado. Assim não precissamos do arquivo original para o ataque.
+ % This fact allows us to obtain the theoretically expected frequency distribution from the random sample. So we don’t need the original carrier medium for the attack.
+
+
+O gráu de similaridade entre a distribuição observada na amostra e a distribuição de frequências teoricamente esperada é a medida de probabilidade de que métodos estegaanográficos foram aplicados.
+ % The degree of similarity of the observed sample distribution and the theoretically expected frequency distribution is a measure of the probability that some embedding has taken place.
+Esse gráu de similaridade é determinado usando o teste Chi Square. Esse teste faz um mapeamento das observações em categorias.
+ % The degree of similarity is determined using the Chi-square test (e.g., [1]). This test operates on a mapping of observations into categories. It performs the following steps:
+
 
 \subsection{RS Analysis}
 \cite{fridrich2001reliable}: detecta LSBs espalhados em imagens em tons de cinza ou coloridas ao inspecionar as diferenças no número de grupos regulares e singulares para os LSB e o plano LSB deslocado.
