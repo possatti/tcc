@@ -1,3 +1,5 @@
+\newcommand{\chisquare}{$\chi^2$}
+
 \chapter{Referêncial Teórico}
 
 \section{Esteganografia}
@@ -18,9 +20,8 @@ Arquivos de múltimídia, como aúdio e vídeo, servem como exceletentes portado
 
 Um esteganograma deve ter as mesmas características estatísticas do aquivo original. De forma contrária, o sistema esteganográfico seria inseguro. \cite{westfeld1999attacks} Pois a presença de uma mensagem secreta seria mais facilmente detectada.
 
+No uso moderno existem dois tipo principais de esteganografia: \emph{Least Significant Bit} (LSB) e \emph{Discrete Cosine Transform} (DCT).
 
-
-\subsection{Métodos de Esteganografia}
 
 \subsubsection{Least Significant Bit (LSB)}
 
@@ -30,13 +31,14 @@ Ao alterar o LSB o valor do byte não altera muito, se comprado a mudança a qua
 
 Alterando os LSBs, a capacidade máxima que temos para esconder uma informação é de $1/8$ do tamanho do arquivo. Se uma imagem tem 152 Kilobytes, podemos esconder 19 Kilobytes (152 Kilobits) de informação.
 
+
 \subsubsection{Discrete Cosine Transform (DCT)}
 
 No formato de imagem JPEG, para cada componente de cor o formato usa \emph{Discrete Cosine Transform} (DCT) para transformar blocos de 8x8 pixels em coeficentes 64 DCTs cada. \cite{provos_hide_2003}
 
 
 \section{Esteganálise}
-%-----------------------
+%---------------------
 
 A esteganálise é uma área de pesquisa que busca criar métodos para detectar quando a esteganografia foi aplicada em um item ou não.
 
@@ -45,7 +47,11 @@ Existem dois tipos principais de esteganálise: visuais e estatísticos. Quandos
 Alguns dos principais métodos de esteganálise são: Chi Square, RS Analysis, Primary Sets, Sample Pair.
 
 \subsection{Chi Square}
-\cite{westfeld1999attacks}: é uma análise estatística dos pares de valores (PoV's) trocados durante a esteganografia LSB. PoV's são grupos de valores binários contidos nos LSBs de um objeto.
+O \emph{\chisquare} (Chi Square) \cite{westfeld1999attacks} é uma análise estatística dos pares de valores (PoVs) trocados durante a esteganografia LSB.
+
+Sobrescrever os LSBs de uma imagem transforma alguns valores em outros valores que apenas diferem pelo LSB. Esses pares de valores são chamados de PoV. \texttt{0110110\textcolor{red}{1}} forma um PoV com \texttt{0110110\textcolor{red}{0}}. Se os LSBs sobrescrescritos forem uniformemente distribuídos, as frequências dos valores de cada PoV irá se igualar. Veja a figura fig . % Fig. 14
+
+A ideia do Chi Square é comparar as distribuição de frequências téorica esperada de esteganogramas com algumas amostras da distribuição observada no item que está sendo análisado.
 
 \subsection{RS Analysis}
 \cite{fridrich2001reliable}: detecta LSBs espalhados em imagens em tons de cinza ou coloridas ao inspecionar as diferenças no número de grupos regulares e singulares para os LSB e o plano LSB deslocado.
@@ -58,6 +64,6 @@ Alguns dos principais métodos de esteganálise são: Chi Square, RS Analysis, P
 
 
 \section{Curva ROC}
-%-----------------------
+%------------------
 
 
