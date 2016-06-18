@@ -5,9 +5,10 @@ SHELL=/bin/bash
 
 # Other variables
 GOOGLE_DRIVE_DIR = /home/possatti/gdrive/TCC/Monografia
-TEX_FILES = monografia.tex 0-abstract.tex 0-resumo.tex 1-introducao.tex 2-referencial.tex 3-desenvolvimento.tex
-BIB_FILES = referencias.bib
-SOURCE_FILES = $(TEX_FILES) $(BIB_FILES)
+TEX_FILES = $(wildcard *.tex)
+BIB_FILES = $(wildcard *.bib)
+IMAGES = $(wildcard img/*)
+SOURCE_FILES = $(TEX_FILES) $(BIB_FILES) $(IMAGES)
 
 
 all: monografia.pdf
@@ -24,20 +25,12 @@ upload: monografia.pdf $(SOURCE_FILES)
 	now=`date +"%F %T"`
 	zip "monografia-source.zip" *.tex *.bib -r img/
 	cp "monografia.pdf" "$(GOOGLE_DRIVE_DIR)/Monografia $$now.pdf"
-	cp "monografia-source.zip" "$(GOOGLE_DRIVE_DIR)/Monografia $$now.zip"
+	mv "monografia-source.zip" "$(GOOGLE_DRIVE_DIR)/Monografia $$now.zip"
 	drive push -no-prompt "$(GOOGLE_DRIVE_DIR)"
 
 deletar_lixo:
-	-rm *.bbl
-	-rm *.idx
-	-rm *.lot
-	-rm *.toc
-	-rm *.blg
-	-rm *.lof
-	-rm *.aux
-	-rm *.brf
-	-rm *.log
+	-rm *.bbl *.idx *.lot *.toc *.blg *.lof *.aux *.brf *.log
 
 clean:
 	$(MAKE) deletar_lixo
-	rm monografia.pdf
+	-rm monografia.pdf
