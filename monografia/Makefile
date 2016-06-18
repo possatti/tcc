@@ -4,7 +4,7 @@ SHELL=/bin/bash
 .PHONY: all clean upload
 
 # Other variables
-GOOGLE_DRIVE_DIR = /home/possatti/gdrive/TCC
+GOOGLE_DRIVE_DIR = /home/possatti/gdrive/TCC/Monografia
 TEX_FILES = monografia.tex 0-abstract.tex 0-resumo.tex 1-introducao.tex 2-referencial.tex 3-desenvolvimento.tex
 
 
