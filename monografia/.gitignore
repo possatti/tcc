@@ -9,3 +9,6 @@
 *.brf
 *.lof
 *.lot
+
+# Source package
+*.zip
