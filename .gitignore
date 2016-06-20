@@ -1,6 +1,9 @@
 # Images
 images/
 
+# Merged books
+messages/books.txt
+
 # Others
 nohup.out
 *.bkp

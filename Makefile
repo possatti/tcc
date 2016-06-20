@@ -13,21 +13,42 @@ F5_DIR=images/f5
 OUTGUESS_DIR=images/outguess
 MESSAGES_DIR=messages
 
+# Images
+CLEAN_IMAGES=$(wildcard $(CLEAN_IMAGES_DIR)/*.jpg)
+
 # Other variables
 KEY=steganography123
 NUKE_MESSAGE=$(MESSAGES_DIR)/nuke.txt
 IMAGE_NAMES=`ls $(CLEAN_IMAGES_DIR)`
+BOOKS=$(wildcard $(MESSAGES_DIR)/books/pg*.txt)
+MERGED_BOOKS=$(MESSAGES_DIR)/books.txt
 
+# Embedding functions
+# Usage: $(call func, cover, estego, message)
+steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
+f5_embed=$(F5) e -e $(3) $(1) $(2)
+outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
+
+# Scripts to read the steganographic capacity
+steghide_capacity=sh scripts/read-steghide-capacity.sh
+f5_capacity=sh scripts/read-f5-capacity.sh
+outguess_capacity=sh scripts/read-outguess-capacity.sh
+
+
+$(MERGED_BOOKS): $(BOOKS)
+	cd $(MESSAGES_DIR)/books
+	sh ../../scripts/merge-books.sh
+	mv books.txt ..
 
 
 $(STEGHIDE_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	steghide embed -p $(KEY) -cf $< -ef $(NUKE_MESSAGE) -sf $@
+	$(call steghide_embed, $<, $@, $(NUKE_MESSAGE))
 
 $(F5_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	$(F5) e -e $(NUKE_MESSAGE) $< $@
+	$(call f5_embed, $<, $@, $(NUKE_MESSAGE))
 
 $(OUTGUESS_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	outguess -k $(KEY) -d $(MESSAGES_DIR)/nuke.txt $< $@
+	$(call outguess_embed, $<, $@, $(NUKE_MESSAGE))
 
 
 steghide:
