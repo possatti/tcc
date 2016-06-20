@@ -24,15 +24,36 @@ BOOKS=$(wildcard $(MESSAGES_DIR)/books/pg*.txt)
 MERGED_BOOKS=$(MESSAGES_DIR)/books.txt
 
 # Embedding functions
-# Usage: $(call func, cover, estego, message)
+# Usage: $(call func,cover,estego,message)
 steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
 f5_embed=$(F5) e -e $(3) $(1) $(2)
 outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
+
+# Checking functions
+# Usage: $(call func,stego_file,expected_message)
+define outguess_check
+outguess -k $(KEY) -r $(1) tmp-extracted.txt
+diff --brief tmp-extracted.txt $(2)
+if [ $$? -eq 1 ]; then
+	echo " >> $(1) does not have the proper hidden message."
+	exit 1
+fi
+rm tmp-extracted.txt
+endef
 
 # Scripts to read the steganographic capacity
 steghide_capacity=sh scripts/read-steghide-capacity.sh
 f5_capacity=sh scripts/read-f5-capacity.sh
 outguess_capacity=sh scripts/read-outguess-capacity.sh
+
+# Helper functions
+# Usage: $(call bytes_to_read,capacity,percentage)
+bytes_to_read=echo "$(1) * 0.$(2)" | bc | sed -r "s;([[:digit:]]+)\..*;\1;"
+# Usage: $(call read_bytes_from_books,n_bytes,file_name)
+read_bytes_from_books=head -c $(1) $(MERGED_BOOKS) > $(2)
+# Usage: $(call name_p,original_name,percentage)
+# Description: Change the original name from "image.jpg" to "image_25p.jpg" for example.
+name_p=echo $(1) | sed -r "s;(.+)\.jpg;\1_$(2)p.jpg;"
 
 
 $(MERGED_BOOKS): $(BOOKS)
@@ -48,8 +69,34 @@ $(F5_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
 	$(call f5_embed, $<, $@, $(NUKE_MESSAGE))
 
 $(OUTGUESS_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	$(call outguess_embed, $<, $@, $(NUKE_MESSAGE))
+	@mkdir $(OUTGUESS_DIR) -p
+	capacity=`$(call outguess_embed, $<, $@, $(NUKE_MESSAGE)) 2>&1 | $(outguess_capacity)`
+	$(call outguess_check,$@,$(NUKE_MESSAGE))
+	echo " >> capacity: $$capacity"
 
+	# 25% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,25)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,25)`
+	$(call outguess_embed,$<,$$name,tmp-books.txt)
+	$(call outguess_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 50% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,50)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,50)`
+	$(call outguess_embed,$<,$$name,tmp-books.txt)
+	$(call outguess_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 90% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,90)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,90)`
+	$(call outguess_embed,$<,$$name,tmp-books.txt)
+	$(call outguess_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
 
 steghide:
 	mkdir $(STEGHIDE_DIR) -p
