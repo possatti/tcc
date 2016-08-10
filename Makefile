@@ -29,10 +29,34 @@ steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
 f5_embed=$(F5) e -e $(3) $(1) $(2)
 outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
 
+# Extracting functions
+# Usage: $(call func,stego_file,destination)
+outguess_extract=outguess -k $(KEY) -r $(1) $(2)
+steghide_extract=steghide extract --passphrase $(KEY) --stegofile $(1) --extractfile $(2)
+f5_extract=$(F5) x -p $(KEY) -e $(2) $(1)
+
 # Checking functions.
 # Usage: $(call func,stego_file,expected_message)
 define outguess_check
 outguess -k $(KEY) -r $(1) tmp-extracted.txt
+diff --brief tmp-extracted.txt $(2)
+if [ $$? -eq 1 ]; then
+	echo " >> $(1) does not have the proper hidden message."
+	exit 1
+fi
+rm tmp-extracted.txt
+endef
+define steghide_check
+$(call steghide_extract,$(1),tmp-extracted.txt)
+diff --brief tmp-extracted.txt $(2)
+if [ $$? -eq 1 ]; then
+	echo " >> $(1) does not have the proper hidden message."
+	exit 1
+fi
+rm tmp-extracted.txt
+endef
+define f5_check
+$(call f5_extract,$(1),tmp-extracted.txt)
 diff --brief tmp-extracted.txt $(2)
 if [ $$? -eq 1 ]; then
 	echo " >> $(1) does not have the proper hidden message."
@@ -65,7 +89,34 @@ $(MERGED_BOOKS): $(BOOKS)
 
 # Transforming rules.
 $(STEGHIDE_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	$(call steghide_embed, $<, $@, $(NUKE_MESSAGE))
+	@mkdir $(OUTGUESS_DIR) -p
+	capacity=`steghide info $< -p $(KEY) 2>/dev/null | $(steghide_capacity)`
+	$(call steghide_embed,$<,$@,$(NUKE_MESSAGE))
+	echo " >> capacity: $$capacity"
+
+	# 25% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,25)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,25)`
+	$(call steghide_embed,$<,$$name,tmp-books.txt)
+	$(call steghide_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 50% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,50)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,50)`
+	$(call steghide_embed,$<,$$name,tmp-books.txt)
+	$(call steghide_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 90% of book
+	n_bytes=`$(call bytes_to_read,$$capacity,90)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,90)`
+	$(call steghide_embed,$<,$$name,tmp-books.txt)
+	$(call steghide_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
 
 $(F5_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
 	$(call f5_embed, $<, $@, $(NUKE_MESSAGE))
