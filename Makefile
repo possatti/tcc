@@ -26,7 +26,7 @@ MERGED_BOOKS=$(MESSAGES_DIR)/books.txt
 # Embedding functions.
 # Usage: $(call func,cover,estego,message)
 steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
-f5_embed=$(F5) e -e $(3) $(1) $(2)
+f5_embed=$(F5) e -e $(3) $(1) $(2) -p $(KEY)
 outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
 
 # Extracting functions
@@ -119,7 +119,39 @@ $(STEGHIDE_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
 	rm tmp-books.txt
 
 $(F5_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
-	$(call f5_embed, $<, $@, $(NUKE_MESSAGE))
+	mkdir $(OUTGUESS_DIR) -p
+	capacity=`$(call f5_embed,$<,$@,$(NUKE_MESSAGE)) | $(f5_capacity)`
+	$(call f5_check,$@,$(NUKE_MESSAGE))
+	echo " >> capacity: $$capacity"
+
+	# 25% of book
+	echo " >> Embedding 25% of $@ capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,25)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,25)`
+	$(call f5_embed,$<,$$name,tmp-books.txt)
+	$(call f5_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 50% of book
+	echo " >> Embedding 50% of $@ capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,50)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,50)`
+	$(call f5_embed,$<,$$name,tmp-books.txt)
+	$(call f5_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 90% of book
+	echo " >> Embedding 90% of $@ capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,90)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,90)`
+	$(call f5_embed,$<,$$name,tmp-books.txt)
+	$(call f5_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	echo " >> All done for $@."
 
 $(OUTGUESS_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
 	@mkdir $(OUTGUESS_DIR) -p
