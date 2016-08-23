@@ -1,7 +1,7 @@
 # Makefile options.
 SHELL=/bin/bash
 .ONESHELL:
-.PHONY: clean outguess f5 steghide
+.PHONY: clean outguess f5 steghide stegexpose
 
 # F5 steganography tool.
 F5=java -jar tools/f5.jar
@@ -16,12 +16,21 @@ MESSAGES_DIR=messages
 # Images.
 CLEAN_IMAGES=$(wildcard $(CLEAN_IMAGES_DIR)/*.jpg)
 
+# StegExpose variables.
+REPORTS_DIR=reports
+CLEAN_REPORT=$(REPORTS_DIR)/clean.csv
+STEGHIDE_REPORT=$(REPORTS_DIR)/steghide.csv
+F5_REPORT=$(REPORTS_DIR)/f5.csv
+OUTGUESS_REPORT=$(REPORTS_DIR)/outguess.csv
+StegExpose=java -jar tools/StegExpose.jar
+
 # Other variables.
 KEY=steganography123
 NUKE_MESSAGE=$(MESSAGES_DIR)/nuke.txt
 IMAGE_NAMES=`ls $(CLEAN_IMAGES_DIR)`
 BOOKS=$(wildcard $(MESSAGES_DIR)/books/pg*.txt)
 MERGED_BOOKS=$(MESSAGES_DIR)/books.txt
+
 
 # Embedding functions.
 # Usage: $(call func,cover,estego,message)
@@ -78,6 +87,10 @@ read_bytes_from_books=head -c $(1) $(MERGED_BOOKS) > $(2)
 # Usage: $(call name_p,original_name,percentage)
 # Description: Change the original name from "image.jpg" to "image_25p.jpg" for example.
 name_p=echo $(1) | sed -r "s;(.+)\.jpg;\1_$(2)p.jpg;"
+
+# StegExpose helper function.
+# Usage: $(call func,test_dir,csv)
+run_stegexpose=$(StegExpose) $(1) default default $(2)
 
 
 # Merge the books together.
@@ -245,6 +258,21 @@ outguess_check:
 	done
 	echo "All files contain hidden messages."
 
+
+# Rule for applying steganalysis with StegExpose.
+stegexpose:
+	mkdir -p $(REPORTS_DIR)
+	echo " >> Running StegExpose on '$(STEGHIDE_DIR)'..."
+	$(call run_stegexpose,$(STEGHIDE_DIR),$(STEGHIDE_REPORT))
+	echo " >> Running StegExpose on '$(F5_DIR)'..."
+	$(call run_stegexpose,$(F5_DIR),$(F5_REPORT))
+	echo " >> Running StegExpose on '$(OUTGUESS_DIR)'..."
+	$(call run_stegexpose,$(OUTGUESS_DIR),$(OUTGUESS_REPORT))
+	echo " >> All done with StegExpose."
+
+
+# Do everything!
+all: steghide f5 outguess stegexpose
 
 # Clean the directories.
 clean:
