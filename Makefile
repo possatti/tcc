@@ -1,16 +1,18 @@
 # Makefile options.
 SHELL=/bin/bash
 .ONESHELL:
-.PHONY: clean outguess f5 steghide stegexpose
+.PHONY: clean outguess f5 steghide stepic stegexpose
 
 # F5 steganography tool.
 F5=java -jar tools/f5.jar
 
 # Directories.
 CLEAN_IMAGES_DIR=images/clean
+CLEAN_PNG_IMAGES_DIR=images/clean_png
 STEGHIDE_DIR=images/steghide
 F5_DIR=images/f5
 OUTGUESS_DIR=images/outguess
+STEPIC_DIR=images/stepic
 MESSAGES_DIR=messages
 
 # Images.
@@ -22,6 +24,7 @@ CLEAN_REPORT=$(REPORTS_DIR)/clean.csv
 STEGHIDE_REPORT=$(REPORTS_DIR)/steghide.csv
 F5_REPORT=$(REPORTS_DIR)/f5.csv
 OUTGUESS_REPORT=$(REPORTS_DIR)/outguess.csv
+STEPIC_REPORT=$(REPORTS_DIR)/stepic.csv
 StegExpose=java -jar tools/StegExpose.jar
 
 # Other variables.
@@ -37,12 +40,14 @@ MERGED_BOOKS=$(MESSAGES_DIR)/books.txt
 steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
 f5_embed=$(F5) e -e $(3) $(1) $(2) -p $(KEY)
 outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
+stepic_embed=stepic --encode --image-in $(1) --data-in $(3) --out $(2)
 
 # Extracting functions
 # Usage: $(call func,stego_file,destination)
 outguess_extract=outguess -k $(KEY) -r $(1) $(2)
 steghide_extract=steghide extract --passphrase $(KEY) --stegofile $(1) --extractfile $(2)
 f5_extract=$(F5) x -p $(KEY) -e $(2) $(1)
+stepic_extract=stepic --decode --image-in $(1) --out $(2)
 
 # Checking functions.
 # Usage: $(call func,stego_file,expected_message)
@@ -73,8 +78,18 @@ if [ $$? -eq 1 ]; then
 fi
 rm tmp-extracted.txt
 endef
+define stepic_check
+$(call stepic_extract,$(1),tmp-extracted.txt)
+diff --brief tmp-extracted.txt $(2)
+if [ $$? -eq 1 ]; then
+	echo " >> $(1) does not have the proper hidden message."
+	exit 1
+fi
+rm tmp-extracted.txt
+endef
 
-# Scripts to read the steganographic capacity.
+# Scripts to read the steganographic capacity. (Output in bytes to read from file)
+lsb_capacity=du $(1) --bytes | cut -f1 | sed -r 's;.*;&/8;' | bc
 steghide_capacity=sh scripts/read-steghide-capacity.sh
 f5_capacity=sh scripts/read-f5-capacity.sh
 outguess_capacity=sh scripts/read-outguess-capacity.sh
@@ -86,7 +101,7 @@ bytes_to_read=echo "$(1) * 0.$(2)" | bc | sed -r "s;([[:digit:]]+)\..*;\1;"
 read_bytes_from_books=head -c $(1) $(MERGED_BOOKS) > $(2)
 # Usage: $(call name_p,original_name,percentage)
 # Description: Change the original name from "image.jpg" to "image_25p.jpg" for example.
-name_p=echo $(1) | sed -r "s;(.+)\.jpg;\1_$(2)p.jpg;"
+name_p=echo $(1) | sed -r "s;(.+)\.(.+);\1_$(2)p.\2;"
 
 # StegExpose helper function.
 # Usage: $(call func,test_dir,csv)
@@ -196,6 +211,46 @@ $(OUTGUESS_DIR)/%.jpg: $(CLEAN_IMAGES_DIR)/%.jpg $(NUKE_MESSAGE)
 	$(call outguess_check,$$name,tmp-books.txt)
 	rm tmp-books.txt
 
+$(STEPIC_DIR)/%.png: $(CLEAN_PNG_IMAGES_DIR)/%.png $(NUKE_MESSAGE)
+	echo " >> Working on '$@'..."
+	mkdir $(STEPIC_DIR) -p
+	capacity=`$(call lsb_capacity,$<)`
+	echo " >> Esteganographic capacity is $$capacity bytes."
+
+	# Small text
+	echo " >> Embedding small message on '$@'..."
+	$(call stepic_embed,$<,$@,$(NUKE_MESSAGE))
+	$(call stepic_check,$@,$(NUKE_MESSAGE))
+
+	# 25% of book
+	echo " >> Embedding 25% of '$@' capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,25)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,25)`
+	$(call stepic_embed,$<,$$name,tmp-books.txt)
+	$(call stepic_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 50% of book
+	echo " >> Embedding 50% of '$@' capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,50)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,50)`
+	$(call stepic_embed,$<,$$name,tmp-books.txt)
+	$(call stepic_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	# 90% of book
+	echo " >> Embedding 90% of '$@' capacity..."
+	n_bytes=`$(call bytes_to_read,$$capacity,90)`
+	$(call read_bytes_from_books,$$n_bytes,tmp-books.txt)
+	name=`$(call name_p,$@,90)`
+	$(call stepic_embed,$<,$$name,tmp-books.txt)
+	$(call stepic_check,$$name,tmp-books.txt)
+	rm tmp-books.txt
+
+	echo " >> All done for $@."
+
 
 # Rules for making all esteganography.
 steghide:
@@ -214,6 +269,12 @@ outguess:
 	mkdir $(OUTGUESS_DIR) -p
 	for image in $(IMAGE_NAMES); do
 		make "$(OUTGUESS_DIR)/$$image"
+	done
+
+stepic:
+	mkdir $(STEPIC_DIR) -p
+	for image in `ls $(CLEAN_PNG_IMAGES_DIR)`; do
+		make "$(STEPIC_DIR)/$$image"
 	done
 
 
@@ -268,11 +329,13 @@ stegexpose:
 	$(call run_stegexpose,$(F5_DIR),$(F5_REPORT))
 	echo " >> Running StegExpose on '$(OUTGUESS_DIR)'..."
 	$(call run_stegexpose,$(OUTGUESS_DIR),$(OUTGUESS_REPORT))
+	echo " >> Running StegExpose on '$(STEPIC_DIR)'..."
+	$(call run_stegexpose,$(STEPIC_DIR),$(STEPIC_REPORT))
 	echo " >> All done with StegExpose."
 
 
 # Do everything!
-all: steghide f5 outguess stegexpose
+all: steghide f5 outguess stepic stegexpose
 
 # Clean the directories.
 clean:
