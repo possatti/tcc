@@ -1,7 +1,7 @@
 # Makefile options.
 SHELL=/bin/bash
 .ONESHELL:
-.PHONY: clean all outguess f5 steghide stepic stegexpose
+.PHONY: clean all outguess f5 steghide stepic lsbsteg stegexpose
 
 # Directories and images.
 IMAGES_DIR = images
@@ -13,6 +13,7 @@ STEGHIDE_DIR = $(IMAGES_DIR)/steghide
 OUTGUESS_DIR = $(IMAGES_DIR)/outguess
 F5_DIR = $(IMAGES_DIR)/f5
 STEPIC_DIR = $(IMAGES_DIR)/stepic
+LSBSTEG_DIR = $(IMAGES_DIR)/lsbsteg
 
 # StegExpose variables.
 StegExpose = java -jar tools/StegExpose.jar
@@ -23,6 +24,7 @@ STEGHIDE_REPORT = $(REPORTS_DIR)/steghide.csv
 F5_REPORT = $(REPORTS_DIR)/f5.csv
 OUTGUESS_REPORT = $(REPORTS_DIR)/outguess.csv
 STEPIC_REPORT = $(REPORTS_DIR)/stepic.csv
+LSBSTEG_REPORT = $(REPORTS_DIR)/lsbsteg.csv
 
 # Other variables.
 MESSAGES_DIR = messages
@@ -31,7 +33,7 @@ MERGED_BOOKS = $(MESSAGES_DIR)/books.txt
 
 
 # Do everything!
-all: clean steghide f5 outguess stepic stegexpose
+all: clean steghide f5 outguess stepic lsbsteg stegexpose
 
 # Merge the books together.
 $(MERGED_BOOKS): $(BOOKS)
@@ -40,28 +42,34 @@ $(MERGED_BOOKS): $(BOOKS)
 	mv books.txt ..
 
 # Rules for making all esteganography.
-steghide:
+steghide: $(MERGED_BOOKS)
 	mkdir -p "$(STEGHIDE_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
 		./embed.sh "steghide" "$$IMAGE_PATH" "$(STEGHIDE_DIR)" --log "steghide-embedding.log" --strict
 	done
 
-f5:
+f5: $(MERGED_BOOKS)
 	mkdir -p "$(F5_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
 		./embed.sh "f5" "$$IMAGE_PATH" "$(F5_DIR)" --log "f5-embedding.log" --strict
 	done
 
-outguess:
+outguess: $(MERGED_BOOKS)
 	mkdir -p "$(OUTGUESS_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
 		./embed.sh "outguess" "$$IMAGE_PATH" "$(OUTGUESS_DIR)" --log "outguess-embedding.log" --strict
 	done
 
-stepic:
+stepic: $(MERGED_BOOKS)
 	mkdir -p "$(STEPIC_DIR)"
 	for IMAGE_PATH in $(CLEAN_PNG_IMAGES); do
 		./embed.sh "stepic" "$$IMAGE_PATH" "$(STEPIC_DIR)" --log "stepic-embedding.log" --strict
+	done
+
+lsbsteg: $(MERGED_BOOKS)
+	mkdir -p "$(LSBSTEG_DIR)"
+	for IMAGE_PATH in $(CLEAN_PNG_IMAGES); do
+		./embed.sh "lsbsteg" "$$IMAGE_PATH" "$(LSBSTEG_DIR)" --log "lsbsteg-embedding.log" --strict
 	done
 
 
@@ -80,6 +88,8 @@ stegexpose:
 	$(StegExpose) $(OUTGUESS_DIR) default default $(OUTGUESS_REPORT)
 	echo " >> Running StegExpose on '$(STEPIC_DIR)'..."
 	$(StegExpose) $(STEPIC_DIR) default default $(STEPIC_REPORT)
+	echo " >> Running StegExpose on '$(LSBSTEG_DIR)'..."
+	$(StegExpose) $(LSBSTEG_DIR) default default $(LSBSTEG_REPORT)
 	echo " >> All done with StegExpose."
 
 # Clean the directories.
@@ -88,4 +98,5 @@ clean:
 	if [ -d "$(OUTGUESS_DIR)" ]; then rm -r $(OUTGUESS_DIR); fi
 	if [ -d "$(F5_DIR)" ]; then rm -r $(F5_DIR); fi
 	if [ -d "$(STEPIC_DIR)" ]; then rm -r $(STEPIC_DIR); fi
+	if [ -d "$(LSBSTEG_DIR)" ]; then rm -r $(LSBSTEG_DIR); fi
 	rm -f *.tmp.*

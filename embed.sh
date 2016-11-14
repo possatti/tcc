@@ -129,6 +129,7 @@ debug "OUTPUT_DIR: $OUTPUT_DIR"
 # Shortcuts for steganography tools that are not present in $PATH.
 shopt -s expand_aliases
 alias f5="java -jar tools/f5.jar"
+alias lsbsteg="python tools/LSBSteg.py"
 
 # Check whether the steganography tool needed is present.
 type "$ALGORITHM" >/dev/null 2>&1 || \
@@ -171,6 +172,13 @@ stepic_embed() {
   stepic --encode --image-in "$COVER_PATH" --out "$STEGO_PATH" --data-in "$MESSAGE_PATH"
   [ "$?" -eq "0" ] || err "Failed to use stepic on image '$COVER_PATH'."
 }
+lsbsteg_embed() {
+  local COVER_PATH="$1"
+  local STEGO_PATH="$2"
+  local MESSAGE_PATH="$3"
+  lsbsteg -image "$COVER_PATH" -steg-out "$STEGO_PATH" -binary "$MESSAGE_PATH"
+  [ "$?" -eq "0" ] || err "Failed to use lsbsteg on image '$COVER_PATH'."
+}
 
 ## Test outguess_extract function.
 # echo "I don't know..." > "test-message.tmp.jpg"
@@ -199,6 +207,11 @@ stepic_extract() {
   local STEGO_FILE="$1"
   local OUTPUT_MESSAGE_PATH="$2"
   stepic --decode --image-in "$STEGO_FILE" --out "$OUTPUT_MESSAGE_PATH"
+}
+lsbsteg_extract() {
+  local STEGO_FILE="$1"
+  local OUTPUT_MESSAGE_PATH="$2"
+  lsbsteg -steg-image "$STEGO_FILE" -out "$OUTPUT_MESSAGE_PATH"
 }
 
 ## Test outguess_embed function.
@@ -256,6 +269,16 @@ f5_capacity() {
   rm -f "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH"
 }
 stepic_capacity() {
+  local IMAGE_PATH="$1"
+
+  # Read image's size in bytes.
+  local IMAGE_SIZE=$(du "$IMAGE_PATH" --bytes | cut -f1)
+  debug "IMAGE_SIZE: $IMAGE_SIZE"
+
+  # The number of usable LSBs is the image's size devided by 8.
+  bc <<< "$IMAGE_SIZE / 8"
+}
+lsbsteg_capacity() {
   local IMAGE_PATH="$1"
 
   # Read image's size in bytes.
