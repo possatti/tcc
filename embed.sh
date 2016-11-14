@@ -9,7 +9,7 @@ set -o nounset  # exit when script tries to use undeclared variables.
 
 # Displays usage and quit.
 usage() {
-  echo " Usage: $0 <ALGORITHM> <IMAGE_PATH> <OUTPUT_DIR> [-h] [-d] [-l FILE]"
+  echo " Usage: $0 <ALGORITHM> <IMAGE_PATH> <OUTPUT_DIR>"
   echo
   echo ' Description:'
   echo "   Create four files containing 1%, 25%, 50% and 90% of the image's"
@@ -27,6 +27,8 @@ usage() {
   echo '      Enables debugging.'
   echo '   -l --log  FILE'
   echo '      Log messages to the specified file path.'
+  echo '   -s --strict'
+  echo '      Quits the script on the first error.'
   exit
 }
 
@@ -42,6 +44,8 @@ TESTING_MESSAGE="Why a raven is like a writing desk?"
 LOG_PATH=""
 # Don't debug, by default.
 DEBUG=""
+# Don't use strict, by default.
+STRICT=""
 
 # Outputs arguments to stdout.
 info() {
@@ -61,7 +65,11 @@ err() {
   else
     echo "[$NOW] ERROR  $@" 1>&2
   fi
-  exit 1
+
+  # Quit if strict mode is on.
+  if [ -n "$STRICT" ]; then
+    exit 1
+  fi
 }
 
 # Outputs debugging info to stderr.
@@ -84,7 +92,11 @@ while [ $# -gt 0 ]; do
         usage
         ;;
     -d|--debug)
-        DEBUG=true
+        DEBUG="true"
+        shift 1
+        ;;
+    -s|--strict)
+        STRICT="true"
         shift 1
         ;;
     -l|--log)
@@ -99,6 +111,7 @@ while [ $# -gt 0 ]; do
         ;;
   esac
 done
+
 
 # Clean the log file before we write to it.
 rm -f "$LOG_PATH"
