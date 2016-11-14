@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-##
-## Create 4 files containing ~1%, 25%, 50% and 90% of the image capacity,
-## using the specified algorithm.
-##
 
 # Set some bash options.
 #  - http://kvz.io/blog/2013/11/21/bash-best-practices/
@@ -14,6 +10,10 @@ set -o nounset  # exit when script tries to use undeclared variables.
 # Displays usage and quit.
 usage() {
   echo " Usage: $0 <ALGORITHM> <IMAGE_PATH> <OUTPUT_DIR> [-h] [-d] [-l FILE]"
+  echo
+  echo ' Description:'
+  echo "   Create four files containing 1%, 25%, 50% and 90% of the image's"
+  echo "   capacity, using the specified algorithm."
   echo
   echo ' Arguments:'
   echo '   ALGORITHM - One of these: [f5, outguess, steghide, stepic].'
