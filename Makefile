@@ -26,6 +26,14 @@ OUTGUESS_REPORT = $(REPORTS_DIR)/outguess.csv
 STEPIC_REPORT = $(REPORTS_DIR)/stepic.csv
 LSBSTEG_REPORT = $(REPORTS_DIR)/lsbsteg.csv
 
+# Embedding Logs
+LOG_DIR = logs
+STEGHIDE_LOG = $(LOG_DIR)/steghide.log
+F5_LOG = $(LOG_DIR)/f5.log
+OUTGUESS_LOG = $(LOG_DIR)/outguess.log
+STEPIC_LOG = $(LOG_DIR)/stepic.log
+LSBSTEG_LOG = $(LOG_DIR)/lsbsteg.log
+
 # Other variables.
 MESSAGES_DIR = messages
 BOOKS = $(wildcard $(MESSAGES_DIR)/books/pg*.txt)
@@ -45,31 +53,31 @@ $(MERGED_BOOKS): $(BOOKS)
 steghide: $(MERGED_BOOKS)
 	mkdir -p "$(STEGHIDE_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
-		./embed.sh "steghide" "$$IMAGE_PATH" "$(STEGHIDE_DIR)" --log "steghide-embedding.log" --strict
+		./embed.sh "steghide" "$$IMAGE_PATH" "$(STEGHIDE_DIR)" --log "$(STEGHIDE_LOG)" --strict
 	done
 
 f5: $(MERGED_BOOKS)
 	mkdir -p "$(F5_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
-		./embed.sh "f5" "$$IMAGE_PATH" "$(F5_DIR)" --log "f5-embedding.log" --strict
+		./embed.sh "f5" "$$IMAGE_PATH" "$(F5_DIR)" --log "$(F5_LOG)" --strict
 	done
 
 outguess: $(MERGED_BOOKS)
 	mkdir -p "$(OUTGUESS_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
-		./embed.sh "outguess" "$$IMAGE_PATH" "$(OUTGUESS_DIR)" --log "outguess-embedding.log" --strict
+		./embed.sh "outguess" "$$IMAGE_PATH" "$(OUTGUESS_DIR)" --log "$(OUTGUESS_LOG)" --strict
 	done
 
 stepic: $(MERGED_BOOKS)
 	mkdir -p "$(STEPIC_DIR)"
 	for IMAGE_PATH in $(CLEAN_PNG_IMAGES); do
-		./embed.sh "stepic" "$$IMAGE_PATH" "$(STEPIC_DIR)" --log "stepic-embedding.log" --strict
+		./embed.sh "stepic" "$$IMAGE_PATH" "$(STEPIC_DIR)" --log "$(STEPIC_LOG)" --strict
 	done
 
 lsbsteg: $(MERGED_BOOKS)
 	mkdir -p "$(LSBSTEG_DIR)"
 	for IMAGE_PATH in $(CLEAN_PNG_IMAGES); do
-		./embed.sh "lsbsteg" "$$IMAGE_PATH" "$(LSBSTEG_DIR)" --log "lsbsteg-embedding.log" --strict
+		./embed.sh "lsbsteg" "$$IMAGE_PATH" "$(LSBSTEG_DIR)" --log "$(LSBSTEG_LOG)" --strict
 	done
 
 
@@ -94,9 +102,16 @@ stegexpose:
 
 # Clean the directories.
 clean:
-	if [ -d "$(STEGHIDE_DIR)" ]; then rm -r $(STEGHIDE_DIR); fi
-	if [ -d "$(OUTGUESS_DIR)" ]; then rm -r $(OUTGUESS_DIR); fi
-	if [ -d "$(F5_DIR)" ]; then rm -r $(F5_DIR); fi
-	if [ -d "$(STEPIC_DIR)" ]; then rm -r $(STEPIC_DIR); fi
-	if [ -d "$(LSBSTEG_DIR)" ]; then rm -r $(LSBSTEG_DIR); fi
+	# Remove directories containing stego-images.
+	rm -rf $(STEGHIDE_DIR)
+	rm -rf $(OUTGUESS_DIR)
+	rm -rf $(F5_DIR)
+	rm -rf $(STEPIC_DIR)
+	rm -rf $(LSBSTEG_DIR)
+	# Remove reports.
+	rm -rf $(REPORTS_DIR)
+	# Remove temporary files.
 	rm -f *.tmp.*
+	# Remove temporary logs.
+	rm -rf $(LOG_DIR)
+	rm -f *.log
