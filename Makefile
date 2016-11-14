@@ -15,13 +15,14 @@ F5_DIR = $(IMAGES_DIR)/f5
 STEPIC_DIR = $(IMAGES_DIR)/stepic
 
 # StegExpose variables.
+StegExpose = java -jar tools/StegExpose.jar
 REPORTS_DIR = reports
-CLEAN_REPORT = $(REPORTS_DIR)/clean.csv
+CLEAN_JPEG_REPORT = $(REPORTS_DIR)/clean-jpeg.csv
+CLEAN_PNG_REPORT = $(REPORTS_DIR)/clean-png.csv
 STEGHIDE_REPORT = $(REPORTS_DIR)/steghide.csv
 F5_REPORT = $(REPORTS_DIR)/f5.csv
 OUTGUESS_REPORT = $(REPORTS_DIR)/outguess.csv
 STEPIC_REPORT = $(REPORTS_DIR)/stepic.csv
-StegExpose = java -jar tools/StegExpose.jar
 
 # Other variables.
 MESSAGES_DIR = messages
@@ -82,6 +83,10 @@ stepic:
 # Rule for applying steganalysis with StegExpose.
 stegexpose:
 	mkdir -p $(REPORTS_DIR)
+	echo " >> Running StegExpose on '$(CLEAN_JPEG_IMAGES_DIR_DIR)'..."
+	$(StegExpose) $(CLEAN_JPEG_IMAGES_DIR_DIR) default default $(CLEAN_JPEG_REPORT)
+	echo " >> Running StegExpose on '$(CLEAN_PNG_IMAGES_DIR_DIR)'..."
+	$(StegExpose) $(CLEAN_PNG_IMAGES_DIR_DIR) default default $(CLEAN_PNG_REPORT)
 	echo " >> Running StegExpose on '$(STEGHIDE_DIR)'..."
 	$(StegExpose) $(STEGHIDE_DIR) default default $(STEGHIDE_REPORT)
 	echo " >> Running StegExpose on '$(F5_DIR)'..."
