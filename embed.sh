@@ -5,6 +5,12 @@
 ## using the specified algorithm.
 ##
 
+# Set some bash options.
+#  - http://kvz.io/blog/2013/11/21/bash-best-practices/
+set -o errexit  # make script exit when a command fails.
+set -o nounset  # exit when script tries to use undeclared variables.
+#set -o xtrace   # trace what gets executed.
+
 # Displays usage and quit.
 usage() {
   echo " Usage: $0 <algorithm> <image_path> <output_dir> [-h] [-d]"
@@ -28,10 +34,11 @@ info() {
   echo "[$NOW] INFO  $@"
 }
 
-# Outputs arguments to stderr.
+# Outputs arguments to stderr and quit.
 err() {
   local NOW=$(date +"%F %T")
   echo "[$NOW] ERROR  $@" 1>&2
+  exit 1
 }
 
 # Outputs debugging info to stderr.
@@ -77,9 +84,9 @@ PASSWORD="steganography123"
 TESTING_MESSAGE="Why a raven is like a writing desk?"
 
 # Debug arguments info.
-debug '$ALGORITHM:' "$ALGORITHM"
-debug '$IMAGE_PATH:' "$IMAGE_PATH"
-debug '$OUTPUT_DIR:' "$OUTPUT_DIR"
+debug "ALGORITHM: $ALGORITHM"
+debug "IMAGE_PATH: $IMAGE_PATH"
+debug "OUTPUT_DIR: $OUTPUT_DIR"
 
 # Shortcuts for steganography tools that are not present in $PATH.
 shopt -s expand_aliases
@@ -88,7 +95,11 @@ alias f5="java -jar tools/f5.jar"
 # Check wether the steganography tool needed is present.
 type "$ALGORITHM" >/dev/null 2>&1 || { err "$ALGORITHM is not installed. Aborting."; exit 1; }
 
-exit
+# Check wether the cover image really exists
+[ -f "$IMAGE_PATH" ] || err "The image file doesn't exist!"
+
+# Create the output directory
+mkdir -p "$OUTPUT_DIR" || err "The output directory doesn't exist and could not be created!"
 
 # Embeds a message file into the cover image.
 # Arguments: <COVER_PATH> <STEGO_PATH> <MESSAGE_PATH>
@@ -100,57 +111,95 @@ outguess_embed() {
   outguess "$COVER_PATH" "$STEGO_PATH" -d "$MESSAGE_PATH" -k "$PASSWORD"
 }
 
+## Test outguess_extract function.
+# echo "I don't know..." > "test-message.tmp.jpg"
+# outguess_embed "$IMAGE_PATH" "stego-test.tmp.jpg" "test-message.tmp.jpg"
+# info "Embedding test finished."
+# exit
+
 # Extracts the hidden message from the stego file.
-# Usage: extract <STEGO_FILE> <EXTRACTED_MESSAGE_PATH>
+# Usage: extract <STEGO_FILE> <OUTPUT_MESSAGE_PATH>
 outguess_extract() {
   local STEGO_FILE="$1"
-  local EXTRACTED_MESSAGE_PATH="$2"
+  local OUTPUT_MESSAGE_PATH="$2"
 
-  outguess -r "$STEGO_FILE" "$EXTRACTED_MESSAGE_PATH" -k "$PASSWORD"
+  outguess -r "$STEGO_FILE" "$OUTPUT_MESSAGE_PATH" -k "$PASSWORD"
 }
+
+## Test outguess_embed function.
+# outguess_extract "stego-test.tmp.jpg" "extracted-message.tmp.txt"
+# info "Extraction test finished."
+# exit
+
 
 # Outputs the image's steganographic capacity (in bytes).
 # Arguments: <IMAGE_PATH>
 outguess_capacity() {
-  local IMAGE_PATH=$1
-  local TEMP_STEGO_PATH="temp_stego_image.jpg"
-  local TEMP_MESSAGE_PATH="temp_message.txt"
-  echo $TESTING_MESSAGE > $TEMP_MESSAGE_PATH
+  local IMAGE_PATH="$1"
+  local TEMP_STEGO_PATH="stego-image.tmp.jpg"
+  local TEMP_MESSAGE_PATH="message.tmp.txt"
+  echo "$TESTING_MESSAGE" > "$TEMP_MESSAGE_PATH"
 
-  local EMBEDDING_OUTPUT=$(embed $IMAGE_PATH $TEMP_STEGO_PATH $TEMP_MESSAGE_PATH 2>&1)
-  echo "EMBEDDING_OUTPUT: $EMBEDDING_OUTPUT" 1>&2
-  local BITS=$(echo $EMBEDDING_OUTPUT | sed -nr 's/Correctable message size: ([[:digit:]]+) bits, .*%/\1/p')
-  echo "BITS: $BITS" 1>&2
-  expr $BITS '/' 8
+  local EMBEDDING_OUTPUT=$(outguess_embed "$IMAGE_PATH" "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH" 2>&1)
+  debug "EMBEDDING_OUTPUT: $EMBEDDING_OUTPUT"
+  local BITS=$(echo "$EMBEDDING_OUTPUT" | sed -nr 's/Correctable message size: ([[:digit:]]+) bits, .*%/\1/p')
+  debug "BITS: $BITS"
+  bc <<< "$BITS / 8"
+
 }
 
-# Checks it the stego-image contains the proper hidden message.
-# Usage: check <EXTRACTING_COMMAND> <STEGO_FILE_PATH> <EXPECTED_MESSAGE_PATH>
+## Test capacity function.
+# outguess_capacity "$IMAGE_PATH"
+# info "Capacity test finished."
+# exit
+
+
+# Checks it the stego-image contains the proper hidden message. If it doesn't
+# contain the proper message, that script is halted with an error message. If
+# it contains the correct message, then everything resumes as usual.
+# Arguments: <EXTRACTING_COMMAND> <STEGO_FILE_PATH> <EXPECTED_MESSAGE_PATH>
 check() {
   local EXTRACTING_COMMAND=$1
   local STEGO_FILE_PATH=$2
   local EXPECTED_MESSAGE_PATH=$3
-  local TEMP_MESSAGE_PATH="temp_extracted_$IMAGE_PATH.txt"
+  local TEMP_MESSAGE_PATH="extracted-message.tmp.txt"
 
-  extract $STEGO_FILE_PATH $TEMP_MESSAGE_PATH
+  "$EXTRACTING_COMMAND" "$STEGO_FILE_PATH" "$TEMP_MESSAGE_PATH"
 
-  diff --brief $TEMP_MESSAGE_PATH $EXPECTED_MESSAGE_PATH
-  if [ "$?" -eq 1 ]; then
-    err "'$STEGO_FILE_PATH' does not have the proper hidden message!"
-    err "Expected: '$EXPECTED_MESSAGE_PATH'."
-    err "Got: '$TEMP_MESSAGE_PATH'."
-    exit 1
-  fi
+  diff --brief "$TEMP_MESSAGE_PATH" "$EXPECTED_MESSAGE_PATH" || \
+    err "'$STEGO_FILE_PATH' does not have the proper hidden message!" \
+      "Expected: '$EXPECTED_MESSAGE_PATH'." \
+      "Got: '$TEMP_MESSAGE_PATH'."
 
-  rm $TEMP_MESSAGE_PATH
+  info "'$STEGO_FILE_PATH' contains the proper hidden message."
+
+  rm "$TEMP_MESSAGE_PATH"
 }
+
+## Test check function
+# echo "I don't know..." > "message.tmp.txt"
+# outguess_embed "$IMAGE_PATH" "stego.tmp.jpg" "message.tmp.txt"
+# check "outguess_extract" "stego.tmp.jpg" "message.tmp.txt"
+# info "Checking test finished."
+# exit
+
 
 # Usage: create_name <OLD_NAME> <PERCENTAGE>
+# <PERCENTAGE>: Percentage without the '%' symbol. E.g. 05, 90, etc.
 create_name() {
-  local OLD_NAME=$(basename $1)
-  local PERCENTAGE=$2
-  echo $OLD_NAME | sed -r "s;(.+)\.(.+);\1_${PERCENTAGE}p.\2;"
+  local OLD_NAME=$(basename "$1")
+  local PERCENTAGE="$2"
+  echo "$OLD_NAME" | sed -r "s;(.+)\.(.+);\1_${PERCENTAGE}p.\2;"
 }
+
+## Test create_name function
+create_name "$IMAGE_PATH" 5
+create_name "$IMAGE_PATH" 90
+info "Creating name test finished."
+exit
+
+debug "Parei aqui!"
+exit
 
 # Usage: do_embed <PERCENTAGE>
 do_embed() {

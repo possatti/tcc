@@ -9,5 +9,6 @@ reports/
 
 # Others
 nohup.out
+*.tmp.*
 *.bkp
 *.log
