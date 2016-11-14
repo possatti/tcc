@@ -30,21 +30,6 @@ BOOKS = $(wildcard $(MESSAGES_DIR)/books/pg*.txt)
 MERGED_BOOKS = $(MESSAGES_DIR)/books.txt
 
 
-# Embedding functions.
-# Usage: $(call func,cover,estego,message)
-steghide_embed=steghide embed -cf $(1) -sf $(2) -ef $(3) -p $(KEY)
-f5_embed=$(F5) e -e $(3) $(1) $(2) -p $(KEY)
-outguess_embed=outguess -d $(3) $(1) $(2) -k $(KEY)
-stepic_embed=stepic --encode --image-in $(1) --data-in $(3) --out $(2)
-
-# Extracting functions
-# Usage: $(call func,stego_file,destination)
-steghide_extract=steghide extract --passphrase $(KEY) --stegofile $(1) --extractfile $(2)
-outguess_extract=outguess -k $(KEY) -r $(1) $(2)
-f5_extract=$(F5) x -p $(KEY) -e $(2) $(1)
-stepic_extract=stepic --decode --image-in $(1) --out $(2)
-
-
 # Do everything!
 all: clean steghide f5 outguess stepic stegexpose
 
