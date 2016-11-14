@@ -39,8 +39,8 @@ stepic_embed=stepic --encode --image-in $(1) --data-in $(3) --out $(2)
 
 # Extracting functions
 # Usage: $(call func,stego_file,destination)
-outguess_extract=outguess -k $(KEY) -r $(1) $(2)
 steghide_extract=steghide extract --passphrase $(KEY) --stegofile $(1) --extractfile $(2)
+outguess_extract=outguess -k $(KEY) -r $(1) $(2)
 f5_extract=$(F5) x -p $(KEY) -e $(2) $(1)
 stepic_extract=stepic --decode --image-in $(1) --out $(2)
 
@@ -56,9 +56,9 @@ $(MERGED_BOOKS): $(BOOKS)
 
 # Rules for making all esteganography.
 steghide:
-	mkdir $(STEGHIDE_DIR) -p
-	for image in $(IMAGE_NAMES); do
-		make "$(STEGHIDE_DIR)/$$image"
+	mkdir -p "$(STEGHIDE_DIR)"
+	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
+		./embed.sh "steghide" "$$IMAGE_PATH" "$(STEGHIDE_DIR)" --log "steghide-embedding.log" --strict
 	done
 
 f5:

@@ -143,6 +143,12 @@ mkdir -p "$OUTPUT_DIR" || \
 
 # Embeds a message file into the cover image.
 # Arguments: <COVER_PATH> <STEGO_PATH> <MESSAGE_PATH>
+steghide_embed() {
+  local COVER_PATH="$1"
+  local STEGO_PATH="$2"
+  local MESSAGE_PATH="$3"
+  steghide embed -cf "$COVER_PATH" -sf "$STEGO_PATH" -ef "$MESSAGE_PATH" -p "$PASSWORD"
+}
 outguess_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
@@ -170,6 +176,11 @@ stepic_embed() {
 
 # Extracts the hidden message from the stego file.
 # Usage: extract <STEGO_FILE> <OUTPUT_MESSAGE_PATH>
+steghide_extract() {
+  local STEGO_FILE="$1"
+  local OUTPUT_MESSAGE_PATH="$2"
+  steghide extract --stegofile "$STEGO_FILE" --extractfile "$OUTPUT_MESSAGE_PATH" --passphrase "$PASSWORD"
+}
 outguess_extract() {
   local STEGO_FILE="$1"
   local OUTPUT_MESSAGE_PATH="$2"
@@ -194,6 +205,18 @@ stepic_extract() {
 
 # Outputs the image's steganographic capacity (in bytes).
 # Arguments: <IMAGE_PATH>
+steghide_capacity() {
+  local IMAGE_PATH="$1"
+
+  # Use 'steghide info' to show the image's steganographic capacity.
+  local OUTPUT=$(steghide info "$IMAGE_PATH" -p any_invalid_password 2>/dev/null)
+  debug "OUTPUT: $OUTPUT"
+  local KILO_BYTES=$(echo "$OUTPUT" | sed -nr 's/ +capacity: ([[:digit:]]+),[[:digit:]]+ KB/\1/p')
+  debug "KILO_BYTES: $KILO_BYTES"
+
+  # Convert to bytes (uses 1000 instead of 1024 on purpose, for "safety").
+  bc <<< "$KILO_BYTES * 1000"
+}
 outguess_capacity() {
   local IMAGE_PATH="$1"
   local TEMP_STEGO_PATH="stego-image.tmp.jpg"
