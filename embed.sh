@@ -13,18 +13,20 @@ set -o nounset  # exit when script tries to use undeclared variables.
 
 # Displays usage and quit.
 usage() {
-  echo " Usage: $0 <algorithm> <image_path> <output_dir> [-h] [-d]"
+  echo " Usage: $0 <ALGORITHM> <IMAGE_PATH> <OUTPUT_DIR> [-h] [-d] [-l FILE]"
   echo
   echo ' Arguments:'
-  echo '   image_path - Path to the clean image.'
-  echo '   algorithm - One of these: [f5, outguess, steghide, stepic].'
-  echo '   output_dir - Where the resulting stego-images should be placed.'
+  echo '   ALGORITHM - One of these: [f5, outguess, steghide, stepic].'
+  echo '   IMAGE_PATH - Path to the clean image.'
+  echo '   OUTPUT_DIR - Where the resulting stego-images should be placed.'
   echo
   echo ' Options:'
   echo '   -h --help'
   echo '      Shows the usage.'
   echo '   -d --debug'
   echo '      Enables debugging.'
+  # echo '   -l --log  FILE'
+  # echo '      Log messages to the specified file path.'
   exit
 }
 
@@ -68,7 +70,7 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Check wether we've got the right number of arguments
+# Check whether we've got the right number of arguments
 [ "$ARGUMENTS_COUNT" -eq "3" ] || usage
 
 # Assign arguments to variables.
@@ -78,6 +80,9 @@ OUTPUT_DIR="${ARGUMENTS[3]}"
 
 # Set password that will be used for all steganography tools.
 PASSWORD="steganography123"
+
+# Set where the file containg the books are.
+MERGED_BOOKS_PATH="messages/books.txt"
 
 # Declare a tiny secret message that will be used for checking the
 # steganographic capacity of images.
@@ -92,14 +97,16 @@ debug "OUTPUT_DIR: $OUTPUT_DIR"
 shopt -s expand_aliases
 alias f5="java -jar tools/f5.jar"
 
-# Check wether the steganography tool needed is present.
-type "$ALGORITHM" >/dev/null 2>&1 || { err "$ALGORITHM is not installed. Aborting."; exit 1; }
+# Check whether the steganography tool needed is present.
+type "$ALGORITHM" >/dev/null 2>&1 || \
+  err "$ALGORITHM is not installed. Aborting."
 
-# Check wether the cover image really exists
+# Check whether the cover image really exists
 [ -f "$IMAGE_PATH" ] || err "The image file doesn't exist!"
 
-# Create the output directory
-mkdir -p "$OUTPUT_DIR" || err "The output directory doesn't exist and could not be created!"
+# Create the output directory, if it doesn't exist
+mkdir -p "$OUTPUT_DIR" || \
+  err "The output directory doesn't exist and could not be created!"
 
 # Embeds a message file into the cover image.
 # Arguments: <COVER_PATH> <STEGO_PATH> <MESSAGE_PATH>
@@ -159,9 +166,9 @@ outguess_capacity() {
 # it contains the correct message, then everything resumes as usual.
 # Arguments: <EXTRACTING_COMMAND> <STEGO_FILE_PATH> <EXPECTED_MESSAGE_PATH>
 check() {
-  local EXTRACTING_COMMAND=$1
-  local STEGO_FILE_PATH=$2
-  local EXPECTED_MESSAGE_PATH=$3
+  local EXTRACTING_COMMAND="$1"
+  local STEGO_FILE_PATH="$2"
+  local EXPECTED_MESSAGE_PATH="$3"
   local TEMP_MESSAGE_PATH="extracted-message.tmp.txt"
 
   "$EXTRACTING_COMMAND" "$STEGO_FILE_PATH" "$TEMP_MESSAGE_PATH"
@@ -193,52 +200,77 @@ create_name() {
 }
 
 ## Test create_name function
-create_name "$IMAGE_PATH" 5
-create_name "$IMAGE_PATH" 90
-info "Creating name test finished."
-exit
+# create_name "$IMAGE_PATH" 5
+# create_name "$IMAGE_PATH" 90
+# info "Creating name test finished."
+# exit
 
-debug "Parei aqui!"
-exit
+# Embeds some text on the image
+# Usage: do_embed <PERCENTAGE> <CAPACITY> <EXTRACT_COMMAND> <EMBED_COMMAND>
+# <PERCENTAGE>: Percentage without the '%' symbol. E.g. 05, 90, etc.
+# do_embed() {
+#   local PERCENTAGE="$1"
+#   local TEMP_MESSAGE_PATH="message.tmp.txt"
 
-# Usage: do_embed <PERCENTAGE>
-do_embed() {
-  local PERCENTAGE=$1
-  local TEMP_MESSAGE_PATH="temp_message.txt"
+#   info "Embedding ${PERCENTAGE}% of '$IMAGE_PATH' capacity..."
+#   NUMBER_BYTES=$(echo "$CAPACITY * $PERCENTAGE / 100" | bc)
+#   head -c $NUMBER_BYTES $MERGED_BOOKS_PATH > $TEMP_MESSAGE_PATH
+#   NEW_NAME=$(create_name $IMAGE_PATH)
+#   STEGO_PATH=$OUTPUT_DIR/$NEW_NAME
 
-  info "Embedding ${PERCENTAGE}% of '$IMAGE_PATH' capacity..."
-  NUMBER_BYTES=$(echo "$CAPACITY * $PERCENTAGE / 100" | bc)
-  head -c $NUMBER_BYTES $MERGED_BOOKS_PATH > $TEMP_MESSAGE_PATH
-  NEW_NAME=$(create_name $IMAGE_PATH)
-  STEGO_PATH=$OUTPUT_DIR/$NEW_NAME
+#   info "Embedding $NUMBER_BYTES bytes into image and saving to '$STEGO_PATH'..."
+#   embed $IMAGE_PATH $STEGO_PATH $TEMP_MESSAGE_PATH
 
-  info "Embedding $NUMBER_BYTES bytes into image and saving to '$STEGO_PATH'..."
-  embed $IMAGE_PATH $STEGO_PATH $TEMP_MESSAGE_PATH
-
-  info "Checking whether '$STEGO_PATH' contains the proper message..."
-  check $STEGO_PATH $TEMP_MESSAGE_PATH
-  rm $TEMP_MESSAGE_PATH
-}
+#   info "Checking whether '$STEGO_PATH' contains the proper message..."
+#   check $STEGO_PATH $TEMP_MESSAGE_PATH
+#   rm $TEMP_MESSAGE_PATH
+# }
 
 # Create files with ~1%, 25%, 50% and 90% of the image capacity.
-do_all_embedding() {
-  EMBEDING_FUNCTION=$1
-  EXTRACTING_FUNCTION=$2
-  CAPACITY_FUNCTION=$3
+main() {
+  # Define which functions are going to be used.
+  local EMBEDING_FUNCTION="${ALGORITHM}_embed"
+  local EXTRACTING_FUNCTION="${ALGORITHM}_extract"
+  local CAPACITY_FUNCTION="${ALGORITHM}_capacity"
 
   info "Working on '$IMAGE_PATH'..."
-  mkdir -p $OUTPUT_DIR
-  CAPACITY=$(capacity $IMAGE_PATH)
-  debug "CAPACITY: $CAPACITY"
+
+  # Define the image's capacity.
+  local CAPACITY=$("$CAPACITY_FUNCTION" "$IMAGE_PATH")
+  [ "$CAPACITY" ] || err "\$CAPACITY was not set!"
   info "Esteganographic capacity for '$IMAGE_PATH' is $CAPACITY bytes."
 
-  # 25% of book
-  do_embed 1
-  do_embed 25
-  do_embed 50
-  do_embed 90
+  # Create stego-files with ~1%, 25%, 50% and 90% of image's capacity.
+  for PERCENTAGE in 1 25 50 90; do
+    info "Embedding ${PERCENTAGE}% of '$IMAGE_PATH' capacity..."
+
+    # Define how many bytes shoulf be embedded.
+    local NUMBER_BYTES=$(bc <<< "$CAPACITY * $PERCENTAGE / 100")
+    [ "$NUMBER_BYTES" ] || err "\$NUMBER_BYTES was not set."
+    info "Embedding ${PERCENTAGE}% of image's capacity (${NUMBER_BYTES} bytes) into the image."
+
+    # Read some bytes from books and write into a temporary file.
+    local TEMP_MESSAGE_PATH="message.tmp.txt"
+    head -c "$NUMBER_BYTES" "$MERGED_BOOKS_PATH" > "$TEMP_MESSAGE_PATH" || \
+      err "Failed to read bytes from books and create temporary message!"
+
+    # Define stego-image's name and path.
+    local STEGO_NAME=$(create_name "$IMAGE_PATH" "$PERCENTAGE")
+    [ "$STEGO_NAME" ] || err "\$STEGO_NAME was not set."
+    local STEGO_PATH="$OUTPUT_DIR/$STEGO_NAME"
+    [ "$STEGO_PATH" ] || err "\$STEGO_PATH was not set."
+    info "Stego-image will be saved to '$STEGO_PATH'."
+
+    # Embed message into the image
+    "$EMBEDING_FUNCTION" "$IMAGE_PATH" "$STEGO_PATH" "$TEMP_MESSAGE_PATH"
+
+    # Check whether the stego-image contains the correct message.
+    info "Checking whether '$STEGO_PATH' contains the proper message..."
+    check "$EXTRACTING_FUNCTION" "$STEGO_PATH" "$TEMP_MESSAGE_PATH"
+  done
 
   info "All done for '$IMAGE_PATH'."
 }
 
-do_all_embedding
+# Run the main function.
+main
