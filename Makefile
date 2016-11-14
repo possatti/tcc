@@ -68,10 +68,10 @@ stepic:
 # Rule for applying steganalysis with StegExpose.
 stegexpose:
 	mkdir -p $(REPORTS_DIR)
-	echo " >> Running StegExpose on '$(CLEAN_JPEG_IMAGES_DIR_DIR)'..."
-	$(StegExpose) $(CLEAN_JPEG_IMAGES_DIR_DIR) default default $(CLEAN_JPEG_REPORT)
-	echo " >> Running StegExpose on '$(CLEAN_PNG_IMAGES_DIR_DIR)'..."
-	$(StegExpose) $(CLEAN_PNG_IMAGES_DIR_DIR) default default $(CLEAN_PNG_REPORT)
+	echo " >> Running StegExpose on '$(CLEAN_JPEG_IMAGES_DIR)'..."
+	$(StegExpose) $(CLEAN_JPEG_IMAGES_DIR) default default $(CLEAN_JPEG_REPORT)
+	echo " >> Running StegExpose on '$(CLEAN_PNG_IMAGES_DIR)'..."
+	$(StegExpose) $(CLEAN_PNG_IMAGES_DIR) default default $(CLEAN_PNG_REPORT)
 	echo " >> Running StegExpose on '$(STEGHIDE_DIR)'..."
 	$(StegExpose) $(STEGHIDE_DIR) default default $(STEGHIDE_REPORT)
 	echo " >> Running StegExpose on '$(F5_DIR)'..."
