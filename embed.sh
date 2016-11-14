@@ -25,29 +25,54 @@ usage() {
   echo '      Shows the usage.'
   echo '   -d --debug'
   echo '      Enables debugging.'
-  # echo '   -l --log  FILE'
-  # echo '      Log messages to the specified file path.'
+  echo '   -l --log  FILE'
+  echo '      Log messages to the specified file path.'
   exit
 }
+
+## Default variables
+# Set password that will be used for all steganography tools.
+PASSWORD="steganography123"
+# Set where the file containg the books are.
+MERGED_BOOKS_PATH="messages/books.txt"
+# Declare a tiny secret message that will be used for checking the
+# steganographic capacity of images.
+TESTING_MESSAGE="Why a raven is like a writing desk?"
+# Don't log, by default.
+LOG_PATH=""
+# Don't debug, by default.
+DEBUG=""
 
 # Outputs arguments to stdout.
 info() {
   local NOW=$(date +"%F %T")
-  echo "[$NOW] INFO  $@"
+  if [ "$LOG_PATH" ]; then
+    echo "[$NOW] INFO  $@" >>"$LOG_PATH"
+  else
+    echo "[$NOW] INFO  $@"
+  fi
 }
 
 # Outputs arguments to stderr and quit.
 err() {
   local NOW=$(date +"%F %T")
-  echo "[$NOW] ERROR  $@" 1>&2
+  if [ "$LOG_PATH" ]; then
+    echo "[$NOW] ERROR  $@" >>"$LOG_PATH"
+  else
+    echo "[$NOW] ERROR  $@" 1>&2
+  fi
   exit 1
 }
 
 # Outputs debugging info to stderr.
 debug() {
-  if [[ $DEBUG ]]; then
+  if [ "$DEBUG" ]; then
     local NOW=$(date +"%F %T")
-    echo "[$NOW] DEBUG  $@" 1>&2
+    if [ "$LOG_PATH" ]; then
+      echo "[$NOW] DEBUG  $@" >>"$LOG_PATH"
+    else
+      echo "[$NOW] DEBUG  $@" 1>&2
+    fi
   fi
 }
 
@@ -62,6 +87,11 @@ while [ $# -gt 0 ]; do
             DEBUG=true
             shift 1
             ;;
+        -l|--log)
+            [ "$2" ] || usage
+            LOG_PATH="$2"
+            shift 2
+            ;;
         *)
             ARGUMENTS_COUNT=$(( $ARGUMENTS_COUNT + 1 ))
             ARGUMENTS[$ARGUMENTS_COUNT]="$1"
@@ -70,6 +100,9 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# Clean the log file before we write to it.
+rm -f "$LOG_PATH"
+
 # Check whether we've got the right number of arguments
 [ "$ARGUMENTS_COUNT" -eq "3" ] || usage
 
@@ -77,16 +110,6 @@ done
 ALGORITHM="${ARGUMENTS[1]}"
 IMAGE_PATH="${ARGUMENTS[2]}"
 OUTPUT_DIR="${ARGUMENTS[3]}"
-
-# Set password that will be used for all steganography tools.
-PASSWORD="steganography123"
-
-# Set where the file containg the books are.
-MERGED_BOOKS_PATH="messages/books.txt"
-
-# Declare a tiny secret message that will be used for checking the
-# steganographic capacity of images.
-TESTING_MESSAGE="Why a raven is like a writing desk?"
 
 # Debug arguments info.
 debug "ALGORITHM: $ALGORITHM"
@@ -152,7 +175,6 @@ outguess_capacity() {
   local BITS=$(echo "$EMBEDDING_OUTPUT" | sed -nr 's/Correctable message size: ([[:digit:]]+) bits, .*%/\1/p')
   debug "BITS: $BITS"
   bc <<< "$BITS / 8"
-
 }
 
 ## Test capacity function.
