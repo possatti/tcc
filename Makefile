@@ -61,23 +61,21 @@ steghide:
 	done
 
 f5:
-	mkdir $(F5_DIR) -p
-	for image in $(IMAGE_NAMES); do
-		make "$(F5_DIR)/$$image"
+	mkdir -p "$(F5_DIR)"
+	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
+		./embed.sh "f5" "$$IMAGE_PATH" "$(F5_DIR)" --log "f5-embedding.log" --strict
 	done
 
 outguess:
-	LOG_PATH="outguess-embedding.log"
 	mkdir -p "$(OUTGUESS_DIR)"
 	for IMAGE_PATH in $(CLEAN_JPEG_IMAGES); do
-		./embed.sh "outguess" "$$IMAGE_PATH" "$(OUTGUESS_DIR)" --log "$$LOG_PATH" --strict
+		./embed.sh "outguess" "$$IMAGE_PATH" "$(OUTGUESS_DIR)" --log "outguess-embedding.log" --strict
 	done
 
 stepic:
-	LOG_PATH="stepic-embedding.log"
 	mkdir -p "$(STEPIC_DIR)"
 	for IMAGE_PATH in $(CLEAN_PNG_IMAGES); do
-		./embed.sh "stepic" "$$IMAGE_PATH" "$(STEPIC_DIR)" --log "$$LOG_PATH" --strict
+		./embed.sh "stepic" "$$IMAGE_PATH" "$(STEPIC_DIR)" --log "stepic-embedding.log" --strict
 	done
 
 

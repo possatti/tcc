@@ -149,6 +149,12 @@ outguess_embed() {
   local MESSAGE_PATH="$3"
   outguess "$COVER_PATH" "$STEGO_PATH" -d "$MESSAGE_PATH" -k "$PASSWORD"
 }
+f5_embed() {
+  local COVER_PATH="$1"
+  local STEGO_PATH="$2"
+  local MESSAGE_PATH="$3"
+  f5 e "$COVER_PATH" "$STEGO_PATH" -e "$MESSAGE_PATH" -p "$PASSWORD"
+}
 stepic_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
@@ -168,6 +174,11 @@ outguess_extract() {
   local STEGO_FILE="$1"
   local OUTPUT_MESSAGE_PATH="$2"
   outguess -r "$STEGO_FILE" "$OUTPUT_MESSAGE_PATH" -k "$PASSWORD"
+}
+f5_extract() {
+  local STEGO_FILE="$1"
+  local OUTPUT_MESSAGE_PATH="$2"
+  f5 x "$STEGO_FILE" -e "$OUTPUT_MESSAGE_PATH" -p "$PASSWORD"
 }
 stepic_extract() {
   local STEGO_FILE="$1"
@@ -195,6 +206,24 @@ outguess_capacity() {
   local BITS=$(echo "$EMBEDDING_OUTPUT" | sed -nr 's/Correctable message size: ([[:digit:]]+) bits, .*%/\1/p')
   debug "BITS: $BITS"
   bc <<< "$BITS / 8"
+
+  # Remove temporary files.
+  rm -f "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH"
+}
+f5_capacity() {
+  local IMAGE_PATH="$1"
+  local TEMP_STEGO_PATH="stego-image.tmp.jpg"
+  local TEMP_MESSAGE_PATH="message.tmp.txt"
+  echo "$TESTING_MESSAGE" > "$TEMP_MESSAGE_PATH"
+
+  # Embeds a small message, so that we can read the capacity.
+  local EMBEDDING_OUTPUT=$(f5_embed "$IMAGE_PATH" "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH" 2>&1)
+  debug "EMBEDDING_OUTPUT: $EMBEDDING_OUTPUT"
+
+
+  local BYTES=$(echo "$EMBEDDING_OUTPUT" | sed -nr 's/default code: ([[:digit:]]+) bytes \(efficiency: .* bits per change\)/\1/p')
+  debug "BYTES: $BYTES"
+  echo $BYTES
 
   # Remove temporary files.
   rm -f "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH"
@@ -260,26 +289,6 @@ create_name() {
 # info "Creating name test finished."
 # exit
 
-# Embeds some text on the image
-# Usage: do_embed <PERCENTAGE> <CAPACITY> <EXTRACT_COMMAND> <EMBED_COMMAND>
-# <PERCENTAGE>: Percentage without the '%' symbol. E.g. 05, 90, etc.
-# do_embed() {
-#   local PERCENTAGE="$1"
-#   local TEMP_MESSAGE_PATH="message.tmp.txt"
-
-#   info "Embedding ${PERCENTAGE}% of '$IMAGE_PATH' capacity..."
-#   NUMBER_BYTES=$(echo "$CAPACITY * $PERCENTAGE / 100" | bc)
-#   head -c $NUMBER_BYTES $MERGED_BOOKS_PATH > $TEMP_MESSAGE_PATH
-#   NEW_NAME=$(create_name $IMAGE_PATH)
-#   STEGO_PATH=$OUTPUT_DIR/$NEW_NAME
-
-#   info "Embedding $NUMBER_BYTES bytes into image and saving to '$STEGO_PATH'..."
-#   embed $IMAGE_PATH $STEGO_PATH $TEMP_MESSAGE_PATH
-
-#   info "Checking whether '$STEGO_PATH' contains the proper message..."
-#   check $STEGO_PATH $TEMP_MESSAGE_PATH
-#   rm $TEMP_MESSAGE_PATH
-# }
 
 # Create files with ~1%, 25%, 50% and 90% of the image capacity.
 main() {
