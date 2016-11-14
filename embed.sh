@@ -79,25 +79,25 @@ debug() {
 # Parse options and arguments.
 ARGUMENTS_COUNT=0
 while [ $# -gt 0 ]; do
-    case "$1" in
-        -h|--help)
-            usage
-            ;;
-        -d|--debug)
-            DEBUG=true
-            shift 1
-            ;;
-        -l|--log)
-            [ "$2" ] || usage
-            LOG_PATH="$2"
-            shift 2
-            ;;
-        *)
-            ARGUMENTS_COUNT=$(( $ARGUMENTS_COUNT + 1 ))
-            ARGUMENTS[$ARGUMENTS_COUNT]="$1"
-            shift 1
-            ;;
-    esac
+  case "$1" in
+    -h|--help)
+        usage
+        ;;
+    -d|--debug)
+        DEBUG=true
+        shift 1
+        ;;
+    -l|--log)
+        [ "$2" ] || usage
+        LOG_PATH="$2"
+        shift 2
+        ;;
+    *)
+        ARGUMENTS_COUNT=$(( $ARGUMENTS_COUNT + 1 ))
+        ARGUMENTS[$ARGUMENTS_COUNT]="$1"
+        shift 1
+        ;;
+  esac
 done
 
 # Clean the log file before we write to it.
