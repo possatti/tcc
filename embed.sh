@@ -148,24 +148,28 @@ steghide_embed() {
   local STEGO_PATH="$2"
   local MESSAGE_PATH="$3"
   steghide embed -cf "$COVER_PATH" -sf "$STEGO_PATH" -ef "$MESSAGE_PATH" -p "$PASSWORD"
+  [ "$?" -eq "0" ] || err "Failed to use steghide on image '$COVER_PATH'."
 }
 outguess_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
   local MESSAGE_PATH="$3"
   outguess "$COVER_PATH" "$STEGO_PATH" -d "$MESSAGE_PATH" -k "$PASSWORD"
+  [ "$?" -eq "0" ] || err "Failed to use outguess on image '$COVER_PATH'."
 }
 f5_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
   local MESSAGE_PATH="$3"
   f5 e "$COVER_PATH" "$STEGO_PATH" -e "$MESSAGE_PATH" -p "$PASSWORD"
+  [ "$?" -eq "0" ] || err "Failed to use f5 on image '$COVER_PATH'."
 }
 stepic_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
   local MESSAGE_PATH="$3"
   stepic --encode --image-in "$COVER_PATH" --out "$STEGO_PATH" --data-in "$MESSAGE_PATH"
+  [ "$?" -eq "0" ] || err "Failed to use stepic on image '$COVER_PATH'."
 }
 
 ## Test outguess_extract function.
