@@ -113,9 +113,6 @@ while [ $# -gt 0 ]; do
 done
 
 
-# Clean the log file before we write to it.
-rm -f "$LOG_PATH"
-
 # Check whether we've got the right number of arguments
 [ "$ARGUMENTS_COUNT" -eq "3" ] || usage
 
@@ -150,8 +147,13 @@ outguess_embed() {
   local COVER_PATH="$1"
   local STEGO_PATH="$2"
   local MESSAGE_PATH="$3"
-
   outguess "$COVER_PATH" "$STEGO_PATH" -d "$MESSAGE_PATH" -k "$PASSWORD"
+}
+stepic_embed() {
+  local COVER_PATH="$1"
+  local STEGO_PATH="$2"
+  local MESSAGE_PATH="$3"
+  stepic --encode --image-in "$COVER_PATH" --out "$STEGO_PATH" --data-in "$MESSAGE_PATH"
 }
 
 ## Test outguess_extract function.
@@ -165,8 +167,12 @@ outguess_embed() {
 outguess_extract() {
   local STEGO_FILE="$1"
   local OUTPUT_MESSAGE_PATH="$2"
-
   outguess -r "$STEGO_FILE" "$OUTPUT_MESSAGE_PATH" -k "$PASSWORD"
+}
+stepic_extract() {
+  local STEGO_FILE="$1"
+  local OUTPUT_MESSAGE_PATH="$2"
+  stepic --decode --image-in "$STEGO_FILE" --out "$OUTPUT_MESSAGE_PATH"
 }
 
 ## Test outguess_embed function.
@@ -183,11 +189,25 @@ outguess_capacity() {
   local TEMP_MESSAGE_PATH="message.tmp.txt"
   echo "$TESTING_MESSAGE" > "$TEMP_MESSAGE_PATH"
 
+  # Embeds a small message, so that we can read the capacity.
   local EMBEDDING_OUTPUT=$(outguess_embed "$IMAGE_PATH" "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH" 2>&1)
   debug "EMBEDDING_OUTPUT: $EMBEDDING_OUTPUT"
   local BITS=$(echo "$EMBEDDING_OUTPUT" | sed -nr 's/Correctable message size: ([[:digit:]]+) bits, .*%/\1/p')
   debug "BITS: $BITS"
   bc <<< "$BITS / 8"
+
+  # Remove temporary files.
+  rm -f "$TEMP_STEGO_PATH" "$TEMP_MESSAGE_PATH"
+}
+stepic_capacity() {
+  local IMAGE_PATH="$1"
+
+  # Read image's size in bytes.
+  local IMAGE_SIZE=$(du "$IMAGE_PATH" --bytes | cut -f1)
+  debug "IMAGE_SIZE: $IMAGE_SIZE"
+
+  # The number of usable LSBs is the image's size devided by 8.
+  bc <<< "$IMAGE_SIZE / 8"
 }
 
 ## Test capacity function.
@@ -268,7 +288,7 @@ main() {
   local EXTRACTING_FUNCTION="${ALGORITHM}_extract"
   local CAPACITY_FUNCTION="${ALGORITHM}_capacity"
 
-  info "Working on '$IMAGE_PATH'..."
+  info "Using $ALGORITHM on '$IMAGE_PATH'..."
 
   # Define the image's capacity.
   local CAPACITY=$("$CAPACITY_FUNCTION" "$IMAGE_PATH")
