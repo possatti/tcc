@@ -121,6 +121,17 @@ ALGORITHM="${ARGUMENTS[1]}"
 IMAGE_PATH="${ARGUMENTS[2]}"
 OUTPUT_DIR="${ARGUMENTS[3]}"
 
+# Create the output directory, if it doesn't exist
+mkdir -p "$OUTPUT_DIR" || \
+  err "The output directory doesn't exist and could not be created!"
+
+# Create the directory that will contain the log if needded
+if [ "$LOG_PATH" ]; then
+  LOG_DIR=$(dirname "$LOG_PATH")
+  mkdir -p "$LOG_DIR" || \
+    err "The log directory doesn't exist and could not be created!"
+fi
+
 # Debug arguments info.
 debug "ALGORITHM: $ALGORITHM"
 debug "IMAGE_PATH: $IMAGE_PATH"
@@ -137,10 +148,6 @@ type "$ALGORITHM" >/dev/null 2>&1 || \
 
 # Check whether the cover image really exists
 [ -f "$IMAGE_PATH" ] || err "The image file doesn't exist!"
-
-# Create the output directory, if it doesn't exist
-mkdir -p "$OUTPUT_DIR" || \
-  err "The output directory doesn't exist and could not be created!"
 
 # Embeds a message file into the cover image.
 # Arguments: <COVER_PATH> <STEGO_PATH> <MESSAGE_PATH>
