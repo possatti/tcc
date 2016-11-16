@@ -17,6 +17,8 @@ LSBSTEG_DIR = $(IMAGES_DIR)/lsbsteg
 
 # StegExpose variables.
 StegExpose = java -jar tools/StegExpose.jar
+STEGEXPOSE_SPEED = default
+STEGEXPOSE_THRESHOLD = default
 REPORTS_DIR = reports
 CLEAN_JPEG_REPORT = $(REPORTS_DIR)/clean-jpeg.csv
 CLEAN_PNG_REPORT = $(REPORTS_DIR)/clean-png.csv
@@ -85,19 +87,19 @@ lsbsteg: $(MERGED_BOOKS)
 stegexpose:
 	mkdir -p $(REPORTS_DIR)
 	echo " >> Running StegExpose on '$(CLEAN_JPEG_IMAGES_DIR)'..."
-	$(StegExpose) $(CLEAN_JPEG_IMAGES_DIR) default default $(CLEAN_JPEG_REPORT)
+	$(StegExpose) $(CLEAN_JPEG_IMAGES_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(CLEAN_JPEG_REPORT)
 	echo " >> Running StegExpose on '$(CLEAN_PNG_IMAGES_DIR)'..."
-	$(StegExpose) $(CLEAN_PNG_IMAGES_DIR) default default $(CLEAN_PNG_REPORT)
+	$(StegExpose) $(CLEAN_PNG_IMAGES_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(CLEAN_PNG_REPORT)
 	echo " >> Running StegExpose on '$(STEGHIDE_DIR)'..."
-	$(StegExpose) $(STEGHIDE_DIR) default default $(STEGHIDE_REPORT)
+	$(StegExpose) $(STEGHIDE_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(STEGHIDE_REPORT)
 	echo " >> Running StegExpose on '$(F5_DIR)'..."
-	$(StegExpose) $(F5_DIR) default default $(F5_REPORT)
+	$(StegExpose) $(F5_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(F5_REPORT)
 	echo " >> Running StegExpose on '$(OUTGUESS_DIR)'..."
-	$(StegExpose) $(OUTGUESS_DIR) default default $(OUTGUESS_REPORT)
+	$(StegExpose) $(OUTGUESS_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(OUTGUESS_REPORT)
 	echo " >> Running StegExpose on '$(STEPIC_DIR)'..."
-	$(StegExpose) $(STEPIC_DIR) default default $(STEPIC_REPORT)
+	$(StegExpose) $(STEPIC_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(STEPIC_REPORT)
 	echo " >> Running StegExpose on '$(LSBSTEG_DIR)'..."
-	$(StegExpose) $(LSBSTEG_DIR) default default $(LSBSTEG_REPORT)
+	$(StegExpose) $(LSBSTEG_DIR) $(STEGEXPOSE_SPEED) $(STEGEXPOSE_THRESHOLD) $(LSBSTEG_REPORT)
 	echo " >> All done with StegExpose."
 
 backup-data:
