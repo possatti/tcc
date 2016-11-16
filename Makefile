@@ -1,7 +1,7 @@
 # Makefile options.
 SHELL=/bin/bash
 .ONESHELL:
-.PHONY: clean all outguess f5 steghide stepic lsbsteg stegexpose
+.PHONY: clean all outguess f5 steghide stepic lsbsteg stegexpose backup-data
 
 # Directories and images.
 IMAGES_DIR = images
@@ -41,7 +41,7 @@ MERGED_BOOKS = $(MESSAGES_DIR)/books.txt
 
 
 # Do everything!
-all: clean steghide f5 outguess stepic lsbsteg stegexpose
+all: clean steghide f5 outguess stepic lsbsteg stegexpose backup-data
 
 # Merge the books together.
 $(MERGED_BOOKS): $(BOOKS)
@@ -99,6 +99,10 @@ stegexpose:
 	echo " >> Running StegExpose on '$(LSBSTEG_DIR)'..."
 	$(StegExpose) $(LSBSTEG_DIR) default default $(LSBSTEG_REPORT)
 	echo " >> All done with StegExpose."
+
+backup-data:
+	NOW=`date +"%F_%T"`
+	zip -r "experimento_$${NOW}.zip" "$(LOG_DIR)" "$(REPORTS_DIR)"
 
 # Clean the directories.
 clean:
