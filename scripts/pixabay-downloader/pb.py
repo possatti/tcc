@@ -2,10 +2,10 @@
 
 """
 pd.py
-    Downloads images from Pixabay'a REST API.
+    Downloads images from Pixabay's API.
 
 Usage:
-    python pixabay_token images_dir number_of_coutries images_per_coutry
+    ./pb.py pixabay_token images_dir number_of_coutries images_per_coutry
 """
 
 import os
