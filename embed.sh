@@ -3,8 +3,8 @@
 
 # Set some bash options.
 #  - http://kvz.io/blog/2013/11/21/bash-best-practices/
-set -o errexit  # make script exit when a command fails.
-set -o nounset  # exit when script tries to use undeclared variables.
+# set -o errexit  # make script exit when a command fails.
+# set -o nounset  # exit when script tries to use undeclared variables.
 #set -o xtrace   # trace what gets executed.
 
 # Displays usage and quit.
@@ -218,7 +218,7 @@ stepic_extract() {
 lsbsteg_extract() {
   local STEGO_FILE="$1"
   local OUTPUT_MESSAGE_PATH="$2"
-  lsbsteg -steg-image "$STEGO_FILE" -out "$OUTPUT_MESSAGE_PATH"
+  lsbsteg -steg-image "$STEGO_FILE" -out "$OUTPUT_MESSAGE_PATH" >/dev/null 2>&1 # Supress titanic output.
 }
 
 ## Test outguess_embed function.
@@ -362,7 +362,7 @@ main() {
   info "Esteganographic capacity for '$IMAGE_PATH' is $CAPACITY bytes."
 
   # Create stego-files with ~1%, 25%, 50% and 90% of image's capacity.
-  for PERCENTAGE in 1 25 50 90; do
+  for PERCENTAGE in 10 20 30 40 50 60 70 80 90 100; do
     info "Embedding ${PERCENTAGE}% of '$IMAGE_PATH' capacity..."
 
     # Define how many bytes shoulf be embedded.
