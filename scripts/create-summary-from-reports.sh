@@ -57,13 +57,13 @@ echo
 echo -n "0%,"
 DETECTED_CLEAN_JPG=$(cat "$REPORTS_DIR/clean-jpeg.csv" | grep "true" | wc -l)
 TOTAL_CLEAN_JPG=$(cat "$REPORTS_DIR/clean-jpeg.csv" | grep "jpg" | wc -l)
-echo -n "$DETECTED_CLEAN_JPG de $TOTAL_CLEAN_JPG,"
-echo -n "$DETECTED_CLEAN_JPG de $TOTAL_CLEAN_JPG,"
-echo -n "$DETECTED_CLEAN_JPG de $TOTAL_CLEAN_JPG,"
+echo -n "$DETECTED_CLEAN_JPG,"
+echo -n "$DETECTED_CLEAN_JPG,"
+echo -n "$DETECTED_CLEAN_JPG,"
 DETECTED_CLEAN_PNG=$(cat "$REPORTS_DIR/clean-png.csv" | grep "true" | wc -l)
 TOTAL_CLEAN_PNG=$(cat "$REPORTS_DIR/clean-png.csv" | grep "png" | wc -l)
-echo -n "$DETECTED_CLEAN_PNG de $TOTAL_CLEAN_PNG,"
-echo -n "$DETECTED_CLEAN_PNG de $TOTAL_CLEAN_PNG,"
+echo -n "$DETECTED_CLEAN_PNG,"
+echo -n "$DETECTED_CLEAN_PNG,"
 echo
 
 
@@ -77,7 +77,7 @@ for PERCENTAGE in $PERCENTAGES; do
     TOTAL=$(cat "$REPORTS_DIR/$TOOL.csv" | sed -nr "/^.*${PERCENTAGE}p.*$/p" | wc -l)
     # Number of detected images for that percentage and tool.
     DETECTED=$(cat "$REPORTS_DIR/$TOOL.csv" | sed -nr "/^.*${PERCENTAGE}p.*true/p" | wc -l)
-    echo -n "$DETECTED de $TOTAL,"
+    echo -n "$DETECTED,"
   done
   echo
 done
