@@ -5,7 +5,7 @@ SHELL=/bin/bash
 
 # Directories and images.
 IMAGES_DIR = images
-CLEAN_JPEG_IMAGES_DIR = $(IMAGES_DIR)/clean-jpeg
+CLEAN_JPEG_IMAGES_DIR = $(IMAGES_DIR)/clean-jpg
 CLEAN_JPEG_IMAGES = $(wildcard $(CLEAN_JPEG_IMAGES_DIR)/*.jpg)
 CLEAN_PNG_IMAGES_DIR = $(IMAGES_DIR)/clean-png
 CLEAN_PNG_IMAGES = $(wildcard $(CLEAN_PNG_IMAGES_DIR)/*.png)
