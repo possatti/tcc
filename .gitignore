@@ -12,3 +12,7 @@ nohup.out
 *.tmp.*
 *.bkp
 *.log
+
+# Python cache
+*.pyc
+__pycache__/
